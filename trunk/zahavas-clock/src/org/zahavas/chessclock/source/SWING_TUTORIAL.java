@@ -1,17 +1,22 @@
 package org.zahavas.chessclock.source;
 
 import javax.swing.*;
-
+import java.sql.*;
+//import java.sql.Connection;
+//import java.sql.DriverManager;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
+import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
 import java.io.*;
 
 //
 public class SWING_TUTORIAL  implements ActionListener {
-	int i = 5;
+
 	int hourCounter = 0;
 	int minuteCounter = 0;	
 	int secondCounter = 0;
@@ -19,37 +24,57 @@ public class SWING_TUTORIAL  implements ActionListener {
 	int aminuteCounter = 0;	
 	int asecondCounter = 0;
 	int sitCounter = 0, standCounter =0;   
-	JPanel scorePanel, buttonPanel, textPanel;
+	JPanel scorePanel, buttonPanel, textPanel,summaryPanel;
 	JButton ExitButton, ToggleButton;
-	JLabel workingScore, awayScore, workingLabel, awayLabel, timeLabel;
+	JComboBox taskChooser;
+	JLabel workingScore, awayScore, workingLabel, awayLabel, timeLabel, workingLabel2;
+	JTextArea taskSummary;
+	private TaskTime T;
+	private List<TaskTime> l = new ArrayList<TaskTime>();
+	private String CurrentTask, SelectedTask;
 
 
-	boolean bStand = true, bSit = false;
+	boolean bStand = true, bSit = false, taskfound = false ;
 	
-	static SWING_TUTORIAL demo;
+	static SWING_TUTORIAL demo ;
 	
 	public SWING_TUTORIAL ()
 	{
 		
 		System.out.println("Swing Tutorial started.");
-
-
+		
 	}
 	
+	 /**
+     * Method: createContentPane
+     * Generates the main UI page 
+     */
 	public JPanel createContentPane(){
 		   
-	        // We create a bottom JPanel to place everything on.
+	       
 	        JPanel totalGUI = new JPanel();
 	        
 	        // We set the Layout Manager to null so we can manually place
 	        // the Panels.
-	        totalGUI.setLayout(null);
+	        //totalGUI.setLayout(null);
 	        totalGUI.setVisible(true);
-	        
-	        	        
-	        // Creation of a Panel to contain the score labels.
+	        //  Position the Task Labels
+	        textPanel = new JPanel();
+	        //textPanel.setLayout(null);
+	        textPanel.setLocation(10, 5);
+	        textPanel.setSize(250, 30);
+	        totalGUI.add(textPanel);
+
+	        workingLabel = new JLabel("Working");
+	        workingLabel.setLocation(0, 0);
+	        workingLabel.setSize(80, 40);
+	        workingLabel.setHorizontalAlignment(0);
+	        textPanel.add(workingLabel);
+
+        
+	        // Creation of a Panel to contain the Total Time labels.
 	        scorePanel = new JPanel();
-	        scorePanel.setLayout(null);
+	        //scorePanel.setLayout(null);
 	        scorePanel.setLocation(10, 40);
 	        scorePanel.setSize(250, 30);
 	        totalGUI.add(scorePanel);
@@ -69,58 +94,57 @@ public class SWING_TUTORIAL  implements ActionListener {
 	        awayScore.setForeground(Color.blue);
 	        scorePanel.add(awayScore);
 	        
-	        textPanel = new JPanel();
-	        textPanel.setLayout(null);
-	        textPanel.setLocation(10, 5);
-	        textPanel.setSize(260, 30);
-	        totalGUI.add(textPanel);
 
-	        // First JLabel, outputs "Red".
-	        // Added to the 'textPanel' JPanel
-	        workingLabel = new JLabel("Working");
-	        workingLabel.setLocation(0, 0);
-	        workingLabel.setSize(50, 40);
-	        workingLabel.setHorizontalAlignment(0);
-	        textPanel.add(workingLabel);
-
-	        awayLabel = new JLabel("Away");
-	        awayLabel.setLocation(210, 0);
-	        awayLabel.setSize(50, 40);
-	        awayLabel.setHorizontalAlignment(0);
-	        textPanel.add(awayLabel);
-	        
 
 	        
 	        // Creation of a label to contain all the JButtons.
 	        JPanel buttonPanel = new JPanel();
-	        buttonPanel.setLayout(null);
-	        buttonPanel.setLocation(10, 100);
-	        buttonPanel.setSize(570, 180);  
+	        //buttonPanel.setLayout(null);
+	        //buttonPanel.setLocation(10, 50);
+	        buttonPanel.setSize(250, 180);  
 	        totalGUI.add(buttonPanel);
-
-	        // We create a button and manipulate it using the syntax we have
-	        // used before.
-
-
-	        
-	        ExitButton = new JButton("Exit");
-	        ExitButton.setLocation(170, 40);
-	        ExitButton.setSize(100, 30);
-	        ExitButton.addActionListener(this);
-	        buttonPanel.add(ExitButton);
 	        
 	        ToggleButton = new JButton("Toggle");
-	        ToggleButton.setLocation(0, 40);
+	        ToggleButton.setLocation(0, 30);
 	        ToggleButton.setSize(100, 30);
 	        ToggleButton.addActionListener(this);
 	        buttonPanel.add(ToggleButton);
 	        
 	        timeLabel = new JLabel("Current Time");
-	        timeLabel.setLocation(10,110);
+	        timeLabel.setLocation(10,60);
 	        timeLabel.setSize(250,40);
 	        timeLabel.setHorizontalAlignment(0);
 	        buttonPanel.add(timeLabel);
 	        
+
+	        String tasks[] = {"Idle", "DB Work:GDM",  "DB Work:Other", "DB Work:TPAT", "Taxes", "Investment Research", "Financial Management",  "Java Training"};
+	        
+	        taskChooser = new JComboBox(tasks);
+	        taskChooser.setSelectedIndex(0);
+	        taskChooser.addActionListener(this);
+	        taskChooser.setLocation(0, 100);
+	        taskChooser.setSize(150, 30);
+	        buttonPanel.add(taskChooser);
+	        
+	        String story = "";
+        
+	        summaryPanel = new JPanel();
+	        //summaryPanel.setLayout(null);
+	       // summaryPanel.setLocation(1, 350);
+	        summaryPanel.setSize(850, 230);  
+	        totalGUI.add(summaryPanel);
+	        
+  
+	        taskSummary = new JTextArea(story, 10,30);
+	        taskSummary.setLineWrap(true);
+	        taskSummary.setWrapStyleWord(true);
+	        taskSummary.setText("No Tasks Yet");
+	        //taskSummary.setLocation(100, 0);
+	        summaryPanel.add(taskSummary);
+	        
+	        
+	        
+
 	        
 	        // Finally we return the JPanel.
 	        totalGUI.setOpaque(true);
@@ -128,53 +152,114 @@ public class SWING_TUTORIAL  implements ActionListener {
 	    }
 	
 	   public void actionPerformed(ActionEvent e) {
-		     System.out.println("Hi");
-		 
-		
-		        if(e.getSource() == ExitButton)
-		        {
-		        	printTime("Work", demo.hourCounter, demo.minuteCounter, demo.secondCounter);	
-		           System.exit(0);		        	
-		        	       	 
-		        }
-			 
-			 
+		     System.out.println("GUI Action");
+
+		   	       	        
+		        if (e.getSource() == taskChooser)
+		         {
+		        	 System.out.println(taskChooser.getSelectedItem());
+		        	 SelectedTask = (String) taskChooser.getSelectedItem();
+		        	 CurrentTask = demo.workingLabel.getText();
+		        	 if (!(CurrentTask.equals(SelectedTask) ))
+		        	 { // Different task.  Set end time of CurrentTask.  Set start time of new task
+		        		 	taskfound = false;
+				         	for(TaskTime TT :demo.l){
+				         						         			
+				         		if (TT.getTaskName() == SelectedTask) 
+				         			{taskfound = true;
+				         			demo.taskSummary.setText(printSummary());
+				         			TT.setIsActive(true);
+				         			}
+				         		else
+				         		{
+				         			TT.setIsActive(false);
+				         		}
+				         	}	
+				         	if ( !taskfound) {
+				         		for(TaskTime TT :demo.l){
+				         			TT.setIsActive(false);
+					         		}
+				         		l.add(demo.T = new TaskTime(SelectedTask, demo.sitCounter)); 
+				         		taskSummary.setText(printSummary());
+				         		taskfound = true;
+				         	}
+				         	
+		        	 }
+				         	
+		        	 // Set new Task
+				     demo.workingLabel.setText(SelectedTask);
+				     printObj(); 
+				 
+		         }
+		        
+		        
+		        
 		        else if(e.getSource() == ToggleButton)
 		        {
-		         if (bSit == true)
+		         if (bSit == true)	// Toggle to Active
 		         	{bStand = true; 
 		         	bSit = false;
-		         	printTime("Work", demo.hourCounter, demo.minuteCounter, demo.secondCounter);
+		         	ToggleButton.setText("Set Active");
 		         	}
-		         else if (bStand == true)
-		         	{bStand = false;
-		         	bSit = true;}
+		         else if (bStand == true)   // toggle to idle
+		         {
+		        	bStand = false;
+		         	bSit = true;
+		         	ToggleButton.setText("Set to Idle");
+		         	printTime("Work Break", demo.hourCounter, demo.minuteCounter, demo.secondCounter);
+		         	System.out.println("Idle time started");
+		         }
 		         	       	 
 		        }
 			
 		}  
 	   
+	   
+	   /**
+	    * createAndShowGUI()
+	    * 
+        * Create and set up the frame. 
+        * The string passed as an argument will be displayed 
+        * the title.
+        * Guidance for adding Window Listeners using WindowAdapter
+        * 1)http://www.klickfamily.com/david/school/cis260/gui28.html
+        * 2)Core Java Volume I Fundamentals C. Horstmann (Kindle Location: 10161)
+        * 	  
+        */
 	   public static void createAndShowGUI() {    
-	        //Create and set up the frame. 
-	        //The string passed as an argument will be displayed 
-	        //as the title.
+	       
 		    JFrame.setDefaultLookAndFeelDecorated(true);
 	        JFrame frame = new JFrame("Task Clock");
-	        
+	        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+	        frame.addWindowListener(new WindowAdapter(){
+				public void windowClosing(WindowEvent arg0) {
+					if (!printFinalSummary()){
+						JOptionPane.showMessageDialog(null,"Please Close the file and try again");
+						}
+					else {System.exit(0);} 
+				}	
+					
+	        });
+
 	       //SWING_TUTORIAL demo = new SWING_TUTORIAL(); 
 	        demo = new SWING_TUTORIAL();
 	        frame.setContentPane(demo.createContentPane());
+	        frame.setSize(450,450);
+	        frame.setVisible(true);
 	        
 	        //Display the window.
-	        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	        frame.setSize(400,400);
-	        frame.setVisible(true);
+	        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 	    }
 
 	   public static void main(String[] args) {
 	        //Schedule a job for the event-dispatching thread:
 	        //creating and showing this application's GUI.
-	       
+
+		   
+		   
+		   
+		   
 	      SwingUtilities.invokeLater(new Runnable() {
 	            public void run() {
 	                createAndShowGUI();
@@ -183,6 +268,12 @@ public class SWING_TUTORIAL  implements ActionListener {
 	            }
 	           
 	        }
+	      
+		   
+	      
+	      
+	      
+	      
 	      );
 	      
        
@@ -201,7 +292,15 @@ public class SWING_TUTORIAL  implements ActionListener {
         	  			demo.minuteCounter = min / (60);
         	  			demo.secondCounter =  demo.sitCounter % 60;
         	  			demo.workingScore.setText(" " +  demo.hourCounter + ":" + demo.minuteCounter + ":" + demo.secondCounter);
-        	  	    
+        	  	        
+        	  			for(TaskTime TT :demo.l){
+			         		if (TT.isIsActive())
+			         		{
+			         			TT.setTaskTimeCounterIncrement();
+			         			break;
+			         		}
+        	  			}
+        	  			demo.taskSummary.setText(printSummary());
         	  		}
         	  		
         	  		
@@ -212,7 +311,7 @@ public class SWING_TUTORIAL  implements ActionListener {
         	  			demo.aminuteCounter = min / (60);
         	  			demo.asecondCounter =  demo.standCounter % 60;
         	  			demo.awayScore.setText(" " +  demo.ahourCounter + ":" + demo.aminuteCounter + ":" + demo.asecondCounter);
-        	  		
+        	  			
         	  		}
        			
         	  	}
@@ -222,6 +321,67 @@ public class SWING_TUTORIAL  implements ActionListener {
             
 	    }
 	   
+	   /**
+	     *  printFileSummary
+	     *  Generates a tab delimited text file that can be opened in Excel and saved as an xls.
+	     *  	
+	     */
+	    public static boolean printFinalSummary()
+	    {
+	    
+	    GregorianCalendar d = new GregorianCalendar();
+	    try{
+	    	String date = Integer.toString(d.get(Calendar.MONTH)+1) + "/" + Integer.toString(d.get(Calendar.DAY_OF_MONTH)) + "/" +  Integer.toString(d.get(Calendar.YEAR));
+	    	String FileNameDate = Integer.toString(d.get(Calendar.MONTH)+1)
+	    			+ Integer.toString(d.get(Calendar.DAY_OF_MONTH)) 
+	    			+ Integer.toString(d.get(Calendar.YEAR))
+	    			+ Integer.toString(d.get(Calendar.HOUR_OF_DAY))
+	    			+ Integer.toString(d.get(Calendar.MINUTE)) 	;
+	    	
+
+	       	File file2 =new File(FileNameDate+"Summary.txt");
+	       	
+	   	 
+    		//if file doesn't exists, then create it
+    		if(!file2.exists()){
+    			file2.createNewFile();
+    		}
+    		
+    	    
+    	    PrintWriter outputStream = null;
+    	    outputStream = new PrintWriter(file2.getName());
+    	    
+    	    for(TaskTime TT :demo.l){
+         		 
+   	        
+      	        outputStream.write(date + "\t" +TT.getTaskName() +"\t" + TT.convertToHourMinSec() + "\t");
+      	        outputStream.print(TT.getHours());
+      	        outputStream.print("\t");
+      	        outputStream.print(TT.getMinutes());
+      	        outputStream.print("\t");
+      	        outputStream.println(TT.getSeconds());
+  			}
+
+    	    outputStream.close();
+    	    
+    	    
+    	    
+    	    
+    	    
+    	    return true;    
+	    }catch(IOException e){
+	    	
+    		//e.printStackTrace();
+    		JOptionPane.showMessageDialog(null,e.getMessage());
+    		return false;
+    	}
+        
+	    
+	    
+	    
+	    
+	    
+	    }
 	   
 		public static void printTime(String Desc, int hC, int mC, int sC)
 		{
@@ -252,5 +412,48 @@ public class SWING_TUTORIAL  implements ActionListener {
 			
 		}
 		
+		public static String printSummary()
+		{	
+			GregorianCalendar d = new GregorianCalendar();
+			String sDate = d.getTime().toString();
+			String sSummary = "";
+			String s, u;
+			TaskTime T;
+			//System.out.println("printObj");
+			Iterator<TaskTime> i = demo.l.iterator();
+		while (i.hasNext()) 
+        {
+        	T = i.next();
+        	s = T.getTaskName();
+			u = T.convertToHourMinSec();
+			sSummary = sSummary +sDate +"\t" + s + "\t" +  u + "\n";
+			System.out.println(sSummary);
+        
+        }
+		
+			return sSummary;
+		}
+		
+		public static void printObj()
+		{   
+			int f, p, q ;
+			String s, u;
+			TaskTime T;
+			//System.out.println("printObj");
+			Iterator<TaskTime> i = demo.l.iterator();
+			while (i.hasNext()) 
+            {
+            	T = i.next();
+            	p = T.getEndTimeCounter();
+            	q = T.getTaskTimecounter();
+				f = T.getStartTimeCounter();
+				s = T.getTaskName();
+				u = T.convertToHourMinSec();
+				System.out.println(u + " /total time:" + Integer.toString(q) + ".  start time:  " + Integer.toString(f) +  " Task:" +s + " End Time:" + Integer.toString(p) );
+            
+            }
+
+						
+		}
 
 }
