@@ -26,7 +26,7 @@ public class SQLLiteAccess {
 		    Statement stmt = null;
 		    try {
 		      Class.forName("org.sqlite.JDBC");
-		      c = DriverManager.getConnection("jdbc:sqlite:test.db");
+		      c = DriverManager.getConnection("jdbc:sqlite:chessclock.db");
 		      System.out.println("Opened database successfully");
 
 		      stmt = c.createStatement();
@@ -50,8 +50,7 @@ public class SQLLiteAccess {
 		 * @param Return boolean
 		 * @author  HSumner
 		 * 
-		 * Eg: "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
-        *     "VALUES (1, 'Paul', 32, 'California', 20000.00 );"
+		 * Eg: "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) VALUES (1, 'Paul', 32, 'California', 20000.00 );"
         *     
         *     "DELETE from COMPANY where ID=2;"
         *     
@@ -67,7 +66,7 @@ public class SQLLiteAccess {
 	    Statement stmt = null;
 	    try {
 	      Class.forName("org.sqlite.JDBC");
-	      c = DriverManager.getConnection("jdbc:sqlite:test.db");
+	      c = DriverManager.getConnection("jdbc:sqlite:chessclock.db");
 	      c.setAutoCommit(false);
 	      System.out.println("Opened database successfully");
 
