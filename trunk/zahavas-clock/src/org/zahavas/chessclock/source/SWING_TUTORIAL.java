@@ -117,7 +117,7 @@ public class SWING_TUTORIAL  implements ActionListener {
 	        buttonPanel.add(timeLabel);
 	        
 
-	        String tasks[] = {"Idle", "DB Work:GDM",  "DB Work:Other", "DB Work:TPAT", "Taxes", "Investment Research", "Financial Management",  "Java Training"};
+	        String tasks[] = {"Idle", "DB Work:GDM", "DB Work:GP", "DB Work:Other", "DB Work:TPAT", "Taxes","Torah", "Investment Research", "Financial Management",  "Java Training"};
 	        
 	        taskChooser = new JComboBox(tasks);
 	        taskChooser.setSelectedIndex(0);
@@ -257,8 +257,11 @@ public class SWING_TUTORIAL  implements ActionListener {
 	        //creating and showing this application's GUI.
 
 		   
-		   
-		   
+		  SQLProject  db =new SQLProject();
+  
+		  
+		  db.SQLLiteExecStatement("INSERT INTO TASKSUMMARY (TASKDATE,CLIENTNAME,TASKNAME,TASKHOUR,TASKMINUTE, TASKSECOND,NAME) VALUES ( '3/23/2014', 'DB', 'DB OTHER', 0,30,2,'a name' );");
+		  db.SelectFromTASKSUMMARY(); 
 		   
 	      SwingUtilities.invokeLater(new Runnable() {
 	            public void run() {
