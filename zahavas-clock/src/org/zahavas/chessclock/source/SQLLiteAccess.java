@@ -26,7 +26,7 @@ public class SQLLiteAccess {
 		    Statement stmt = null;
 		    try {
 		      Class.forName("org.sqlite.JDBC");
-		      c = DriverManager.getConnection("jdbc:sqlite:chessclock.db");
+		      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
 		      System.out.println("Opened database successfully");
 
 		      stmt = c.createStatement();
@@ -66,7 +66,7 @@ public class SQLLiteAccess {
 	    Statement stmt = null;
 	    try {
 	      Class.forName("org.sqlite.JDBC");
-	      c = DriverManager.getConnection("jdbc:sqlite:chessclock.db");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
 	      c.setAutoCommit(false);
 	      System.out.println("Opened database successfully");
 

@@ -3,6 +3,7 @@ package org.zahavas.chessclock.source;
 
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class SQLProject extends SQLLiteAccess
 {
@@ -18,7 +19,7 @@ public class SQLProject extends SQLLiteAccess
 	    Statement stmt = null;
 	    try {
 	    	
-	    	File file =new File("chessclock.db");
+	    	File file =new File("tasktracker.db");
 	   	 
     		//if file exists, then exit
 	    	if(file.exists()){
@@ -26,14 +27,15 @@ public class SQLProject extends SQLLiteAccess
     		}	
 	    	
 	      Class.forName("org.sqlite.JDBC");
-	      c = DriverManager.getConnection("jdbc:sqlite:chessclock.db");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
 	      System.out.println("Opened database successfully");
   
 	      
 	      stmt = c.createStatement();
 	      String sql = "CREATE TABLE CLIENT " +
-	                   "(ID 			INT 	PRIMARY KEY     NOT NULL," +
-	                   " CLIENTNAME     TEXT    NOT NULL) "; 
+	                   "(ID 					INT 	PRIMARY KEY     NOT NULL," +
+	                   " CLIENTSHORTNAME 		TEXT 	NOT NULL," +
+	                   " CLIENTNAME     		TEXT    NOT NULL) "; 
 	      stmt.executeUpdate(sql);
 	      stmt.close();
 	      System.out.println("Table Client added successfully");
@@ -41,7 +43,8 @@ public class SQLProject extends SQLLiteAccess
 	      stmt = c.createStatement();
 	      sql = 	   "CREATE TABLE TASK " +
 	                   "(ID 					INT PRIMARY KEY     NOT NULL," +
-	                   " CLIENTNAME 			TEXT NOT NULL," +
+	                   " CLIENTSHORTNAME 		TEXT NOT NULL," +
+	                   " TASKSHORTNAME 			TEXT NOT NULL," +
 	                   " TASKNAME           	TEXT NOT NULL) "; 
 	      SQLLiteCreateTable (sql);
 	      System.out.println("Table Task added successfully");
@@ -49,8 +52,8 @@ public class SQLProject extends SQLLiteAccess
 	      stmt = c.createStatement();
 	      sql = "CREATE TABLE TASKSUMMARY " +
 	                   "(TASKDATE       TEXT    NOT NULL," +
-	                   " CLIENTNAME 	TEXT    NOT NULL," +
-	                   " TASKNAME       TEXT    NOT NULL, " +
+	                   " CLIENTSHORTNAME 	TEXT    NOT NULL," +
+	                   " TASKSHORTNAME       TEXT    NOT NULL, " +
 	                   " TASKHOUR       INT     NOT NULL," +
 	                   " TASKMINUTE     INT     NOT NULL," +
 	                   " TASKSECOND     INT     NOT NULL," +
@@ -68,6 +71,240 @@ public class SQLProject extends SQLLiteAccess
 		
 		
 	}
+	public String  InsertNewClient(String txtClientShortName, String txtClient)
+	  {
+	    Connection c = null;
+	    Statement stmt = null;
+	    int ID = 0;
+	    int COUNT = 0;
+	    String SQLStatement;
+	    try {
+	      Class.forName("org.sqlite.JDBC");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+	      c.setAutoCommit(false);
+	      System.out.println("Opened database successfully");
+
+	      stmt = c.createStatement();
+	      ResultSet rs0 = stmt.executeQuery( "SELECT COUNT(*) as COUNT FROM CLIENT WHERE CLIENTSHORTNAME = '" + txtClientShortName  + "';" );
+	      while ( rs0.next() ) {
+	           
+	         COUNT = rs0.getInt("COUNT");
+             System.out.println(COUNT);
+             if (COUNT > 0) {
+            	 return "Client Already Exists";
+           	 
+             }
+	      }
+	      rs0.close();
+	      
+	      
+	      
+	      ResultSet rs1 = stmt.executeQuery( "SELECT MAX(ID) as MAXID FROM CLIENT;" );
+	      while ( rs1.next() ) {
+	           
+	         ID = rs1.getInt("MAXID");
+             System.out.println(ID);
+	      }
+	      rs1.close();
+	      stmt.close();
+	      c.close();
+	      ID++;
+	      SQLStatement = "INSERT INTO CLIENT (ID, CLIENTSHORTNAME, CLIENTNAME) VALUES ( '" + ID + "' ,'" + txtClientShortName + "' ,'" + txtClient + "');";
+	      SQLLiteExecStatement (SQLStatement); 	 
+	      SelectFromClient();
+	    } catch ( Exception e ) {
+	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	      System.exit(0);
+	    }
+	    System.out.println("Operation done successfully");
+		return "SUCCESS";
+	  }	
+	 
+	public String  InsertNewTask(String txtClientShortName, String txtTaskShortName, String txtTask)
+	  {
+	    Connection c = null;
+	    Statement stmt = null;
+	    int ID = 0;
+	    int COUNT = 0;
+	    String SQLStatement;
+	    try {
+	      Class.forName("org.sqlite.JDBC");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+	      c.setAutoCommit(false);
+	      System.out.println("Opened database successfully");
+
+	      stmt = c.createStatement();
+	      
+	      ResultSet rs0 = stmt.executeQuery( "SELECT COUNT(*) as COUNT FROM TASK WHERE TASKNAME = '" + txtTask  + "';" );
+	      
+	      while ( rs0.next() ) {
+	           
+	         COUNT = rs0.getInt("COUNT");
+             System.out.println(COUNT);
+             if (COUNT > 0) {
+            	 return "Task Already Exists";
+           	 
+             }
+	      }
+	      rs0.close();
+	      
+	      
+	      
+	      
+	      
+	      ResultSet rs = stmt.executeQuery( "SELECT MAX(ID) as MAXID FROM TASK;" );
+	      while ( rs.next() ) {
+	           
+	         ID = rs.getInt("MAXID");
+             System.out.println(ID);
+	      }
+	      rs.close();
+	      stmt.close();
+	      c.close();
+	      ID++;
+	      SQLStatement = "INSERT INTO TASK (ID, CLIENTSHORTNAME, TASKSHORTNAME, TASKNAME) VALUES ( '" + ID + "' ,'" + txtClientShortName + "' ,'" + txtTaskShortName + "','" + txtTask + "');";
+	      SQLLiteExecStatement (SQLStatement); 	 
+	      SelectFromClient();
+	    } catch ( Exception e ) {
+	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	      System.exit(0);
+	    }
+	    System.out.println("Operation done successfully");
+	    return ("Success");
+	  }	
+	
+	
+	
+	public ArrayList<String> SelectFromClient()
+	 {
+	    Connection c = null;
+	    Statement stmt = null;
+	    int i = 0;
+	    ArrayList returnMatrix = null;
+        returnMatrix = new ArrayList();
+	   // returnMatrix.addAll(new ArrayList());
+	    try {
+	      Class.forName("org.sqlite.JDBC");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+	      c.setAutoCommit(false);
+	      System.out.println("Opened database successfully");
+	     
+	      
+	      stmt = c.createStatement();
+	      ResultSet rs = stmt.executeQuery( "SELECT * FROM CLIENT ORDER BY CLIENTSHORTNAME;" );
+	      while ( rs.next() ) {
+	         
+	         int   ID = rs.getInt("ID");
+	         String CLIENTSHORTNAME  = rs.getString("CLIENTSHORTNAME");
+	         String CLIENTNAME  = rs.getString("CLIENTNAME");
+	         System.out.println( "ID = " + ID );
+	         System.out.println( "CLIENTSHORTNAME = " + CLIENTSHORTNAME );
+	         System.out.println( "CLIENTNAME = " + CLIENTNAME );
+	         System.out.println();
+	         returnMatrix.add(new ArrayList());
+	         ((ArrayList)returnMatrix.get(i)).add(CLIENTSHORTNAME);
+	         ((ArrayList)returnMatrix.get(i)).add(CLIENTNAME);
+	         i++;
+	         System.out.println("loop");
+	         
+	      }
+	      rs.close();
+	      stmt.close();
+	      c.close();
+	    } catch ( Exception e ) {
+	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	      System.exit(0);
+	    }
+	    System.out.println("Operation done successfully");
+		
+		
+		
+		return returnMatrix;
+	}
+	
+	public ArrayList<String> SelectDistinctProjectsFromTask ()
+	{
+		 Connection c = null;
+		    Statement stmt = null;
+		    int i = 0;
+		    ArrayList returnMatrix = null;
+	        returnMatrix = new ArrayList();
+		    try {
+		      Class.forName("org.sqlite.JDBC");
+		      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+		      c.setAutoCommit(false);
+		      System.out.println("Opened database successfully");
+
+		      stmt = c.createStatement();
+		      ResultSet rs = stmt.executeQuery( "SELECT CLIENTSHORTNAME, TASKSHORTNAME,COUNT(*) FROM TASK GROUP BY CLIENTSHORTNAME, TASKSHORTNAME ORDER BY CLIENTSHORTNAME, TASKSHORTNAME;" );
+		      while ( rs.next() ) {
+		         String CLIENTSHORTNAME  = rs.getString("CLIENTSHORTNAME");
+		         String TASKSHORTNAME  = rs.getString("TASKSHORTNAME");
+		         System.out.println( "CLIENTSHORTNAME = " + CLIENTSHORTNAME );
+		         System.out.println( "TASKSHORTNAME = " + TASKSHORTNAME );
+		         System.out.println();
+		         returnMatrix.add(new ArrayList());
+		         ((ArrayList)returnMatrix.get(i)).add(CLIENTSHORTNAME);
+		         ((ArrayList)returnMatrix.get(i)).add(TASKSHORTNAME);
+		         i++;
+		      }
+		      rs.close();
+		      stmt.close();
+		      c.close();
+		    } catch ( Exception e ) {
+		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+		      System.exit(0);
+		    }
+		    System.out.println("Operation done successfully");
+		    return returnMatrix;
+	}
+	
+	
+	
+	
+
+	public ArrayList<String> SelectFromTask()
+	 {
+	    Connection c = null;
+	    Statement stmt = null;
+	    int i = 0;
+	    ArrayList returnMatrix = null;
+        returnMatrix = new ArrayList();
+	    try {
+	      Class.forName("org.sqlite.JDBC");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+	      c.setAutoCommit(false);
+	      System.out.println("Opened database successfully");
+
+	      stmt = c.createStatement();
+	      ResultSet rs = stmt.executeQuery( "SELECT * FROM TASK ORDER BY CLIENTSHORTNAME, TASKSHORTNAME, TASKNAME;" );
+	      while ( rs.next() ) {
+	         
+	         int   ID = rs.getInt("ID");
+	         String CLIENTSHORTNAME  = rs.getString("CLIENTSHORTNAME");
+	         String TASKSHORTNAME  = rs.getString("TASKSHORTNAME");
+	         String TASKNAME  = rs.getString("TASKNAME");
+	         System.out.println( "ID = " + ID );
+	         System.out.println( "CLIENTSHORTNAME = " + CLIENTSHORTNAME );
+	         System.out.println( "TASKSHORTNAME = " + TASKSHORTNAME );
+	         System.out.println( "TASKNAME = " + TASKNAME );
+	         System.out.println();
+	         returnMatrix.add(new ArrayList());
+	         ((ArrayList)returnMatrix.get(i)).add(CLIENTSHORTNAME);
+	         ((ArrayList)returnMatrix.get(i)).add(TASKSHORTNAME);
+	         ((ArrayList)returnMatrix.get(i)).add(TASKNAME);
+	         i++;
+	      }
+	      rs.close();
+	      stmt.close();
+	      c.close();
+	    } catch ( Exception e ) {
+	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	      System.exit(0);
+	    }
+	    System.out.println("Operation done successfully");
+	    return returnMatrix;
+	}
 	
 	public  void SelectFromTASKSUMMARY()
 	  {
@@ -75,7 +312,7 @@ public class SQLProject extends SQLLiteAccess
 	    Statement stmt = null;
 	    try {
 	      Class.forName("org.sqlite.JDBC");
-	      c = DriverManager.getConnection("jdbc:sqlite:chessclock.db");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
 	      c.setAutoCommit(false);
 	      System.out.println("Opened database successfully");
 
@@ -84,8 +321,8 @@ public class SQLProject extends SQLLiteAccess
 	      while ( rs.next() ) {
 	         
 	         String  TASKDATE = rs.getString("TASKDATE");
-	         String  CLIENTNAME = rs.getString("CLIENTNAME");
-	         String  TASKNAME = rs.getString("TASKNAME");
+	         String  CLIENTNAME = rs.getString("CLIENTSHORTNAME");
+	         String  TASKNAME = rs.getString("TASKSHORTNAME");
 	         int TASKHOUR  = rs.getInt("TASKHOUR");
 	         int TASKMINUTE  = rs.getInt("TASKMINUTE");
 	         int TASKSECOND  = rs.getInt("TASKSECOND");
