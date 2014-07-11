@@ -49,6 +49,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	private TaskTime T;
 	public static List<TaskTime> l = new ArrayList<TaskTime>();
 	private String CurrentTask, SelectedTask;
+	private String taskChooseItem;
 
 	int hourCounter = 0;
 	int minuteCounter = 0;	
@@ -110,10 +111,10 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	          toggleButton.setText("Set to Idle");  
 		  }
 		  
-		  System.out.println(state.toString());
+		  //System.out.println(state.toString());
 		  //
 		  JNA.User32.INSTANCE.GetWindowTextW(JNA.User32.INSTANCE.GetForegroundWindow(), buffer, MAX_TITLE_LENGTH);
-	        System.out.println("Active window title: " + Native.toString(buffer));
+	        //System.out.println("Active window title: " + Native.toString(buffer));
 	        activeProgramLabel.setText("Active window title: " + Native.toString(buffer));
 	        PointerByReference pointer = new PointerByReference();
 	        JNA.User32.INSTANCE.GetWindowThreadProcessId(JNA.User32.INSTANCE.GetForegroundWindow(), pointer);
@@ -121,12 +122,12 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	    //    JNA.Paspi.INSTANCE.GetModuleBaseNameW(process, null, buffer, MAX_TITLE_LENGTH);
 	    //    System.out.println("Active window process: " + Native.toString(buffer));
 	        
-		  //
+		  
 			String t ="nothing";
 			Calendar cal = new GregorianCalendar();
-			System.out.println(cal.getTime());
+			//System.out.println(cal.getTime());
 			timeLabel.setText (" "+ cal.getTime());
-			t=cal.getTime().toString() + ":" + taskChoose.getSelectedItem().toString(); ;
+			t=cal.getTime().toString() + ":" + SelectedTask; ;
         	 
 			  if (e.getSource() == editTaskMenuItem)
 			  {
@@ -137,25 +138,76 @@ public class TaskFrame extends JFrame implements ActionListener  {
 				  TEdit.setVisible(true);
 				  //TEdit.dispose();
 			  }
-			
-			  if (e.getSource() == taskChoose)
+			  
+			  if (e.getSource() == clientChoose)
+			  {
+				  projectArray = db.SelectDistinctProjectsbyClient(clientChoose.getSelectedItem().toString());
+				  projectChoose.removeAllItems();
+				  projectChoose.addItem("Idle");
+				  taskChoose.removeAllItems();
+				  taskChoose.addItem("Idle");
+				  //clientArray2 = db.SelectFromClient();
+				  i = projectArray.size();
+				  String[] projectArr = new String[i];
+				    for(i = 0; i < projectArray.size();i++){  
+				          for(j = 0; j < ((ArrayList)projectArray.get(i)).size(); j++){  
+				             if (j==0) 
+				             {	            	
+				            	 projectArr[i] = (String)((ArrayList) projectArray.get(i)).get(0) ;
+				            	 projectChoose.addItem(projectArr[i]);
+				             }            
+				          }  
+				       }
+			  }
+			  
+			  else if (e.getSource() == projectChoose)
+			  {  
+				  if (projectChoose.hasFocus())
+				  {  
+				  //if (projectChoose.getSelectedItem() == null) {return;}
+				  taskArray = db.SelectDistinctTasksbyClientProject(clientChoose.getSelectedItem().toString(), projectChoose.getSelectedItem().toString());
+				  taskChoose.removeAllItems();
+				  taskChoose.addItem("Idle");
+				  //clientArray2 = db.SelectFromClient();
+				  i = taskArray.size();
+				  String[] taskArr = new String[i];
+				    for(i = 0; i < taskArray.size();i++){  
+				          for(j = 0; j < ((ArrayList)taskArray.get(i)).size(); j++){  
+				             if (j==0) 
+				             {	            	
+				            	 taskArr[i] = (String)((ArrayList) taskArray.get(i)).get(0) ;
+				            	 taskChoose.addItem(taskArr[i]);
+				             }            
+				          }  
+				       }
+			      }
+			  }
+			  
+			  
+			  
+			  else if (e.getSource() == taskChoose)
 		         {
-		        	 System.out.println(taskChoose.getSelectedItem());
-		        	 t=cal.getTime().toString() + ":" + taskChoose.getSelectedItem().toString(); 
+				  if (taskChoose.hasFocus())
+				  {
+					  SelectedTask = taskChoose.getSelectedItem().toString();
+				  } 
+				  else return;
+				  
+		        	 System.out.println(SelectedTask);
+		        	 t=cal.getTime().toString() + ":" + SelectedTask; 
 		        	 timeLabel.setText (" "+ cal.getTime());
-		        	 currentTaskLabel.setText(taskChoose.getSelectedItem().toString());
-		        	 
-		         //} 
+		        	 currentTaskLabel.setText(SelectedTask);
+		            
 			
-	        	 System.out.println(taskChoose.getSelectedItem());
-	        	 SelectedTask = (String) taskChoose.getSelectedItem();
+	        	 System.out.println(SelectedTask);
+	        	 
 	        	 CurrentTask = workingLog.getText();
 	        	 if (!(CurrentTask.equals(SelectedTask) ))
 	        	 { // Different task.  Set end time of CurrentTask.  Set start time of new task
 	        		 	taskfound = false;
 			         	for(TaskTime TT :l){
 			         						         			
-			         		if (TT.getTaskName() == SelectedTask) 
+			         		if (TT.getTaskName().equals(SelectedTask)) 
 			         			{taskfound = true;
 			         			taskLog.setText(printSummary());
 			         			
@@ -191,7 +243,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		        	bStand = false;
 		         	bSit = true;
 		         	toggleButton.setText("Set to Idle");
-		         	currentTaskLabel.setText(taskChoose.getSelectedItem().toString());
+		         	currentTaskLabel.setText(SelectedTask);
    	 
 		         }
 		        } 
@@ -224,6 +276,9 @@ public class TaskFrame extends JFrame implements ActionListener  {
      	  			awayScore.setText(" " +  ahourCounter + ":" + aminuteCounter + ":" + asecondCounter);
      	  			
      	  		}
+		         
+
+		         
           } 
      
 	
@@ -325,17 +380,20 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	          }  
 	       }
 	       */ 
-		  System.out.println("Here I am");
 		  
 		  
-         String tasks[] = {"Idle"};
-	      clientChoose = new JComboBox<String>(tasks);
-	      clientChoose.addActionListener(this);
-	      projectChoose = new JComboBox<String>(tasks);
+		  
+          String idleTask[] = {"Idle"};
+          if (clientArray2.size()>0)  {clientChoose = new JComboBox<String>(clients);}
+          else clientChoose = new JComboBox<String>(idleTask);
+          clientChoose.addActionListener(this);
+	      
+	      projectChoose = new JComboBox<String>(idleTask);
 	      projectChoose.addActionListener(this);
-	      taskChoose = new JComboBox<String>(tasks);
+	      
+	      taskChoose = new JComboBox<String>(idleTask);
 	      taskChoose.addActionListener(this);
-	      System.out.println("Here I am");
+
 	      toggleButton = new JButton("Toggle");
 	      toggleButton.addActionListener(this);
 	      

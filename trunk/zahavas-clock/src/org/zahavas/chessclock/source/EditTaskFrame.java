@@ -28,6 +28,8 @@ public class EditTaskFrame extends JFrame implements ActionListener{
 	private JTextField txtTaskShortName;
 	private JLabel lblClient;
 	private JLabel lblTask;
+	private JLabel lblTaskDetail;
+	private JLabel lblProject;
 	private JLabel lblLine;
 	private JLabel lblShortName;
 	private JLabel lblLongName;
@@ -49,6 +51,9 @@ public class EditTaskFrame extends JFrame implements ActionListener{
 	      
 	      lblClient = new JLabel("Client:");
 	      lblTask = new JLabel("Task:");
+	      lblTaskDetail = new JLabel("Task Detail:");
+	      
+	      lblProject = new JLabel("Project:");
 	      lblLine = new JLabel("----------------------------------------------------------");
 	      lblShortName = new JLabel("Short Name");
 	      lblLongName = new JLabel("Long Name");
@@ -94,20 +99,19 @@ public class EditTaskFrame extends JFrame implements ActionListener{
 	      add(txtClient,          new GBC(2,1,3,1).setAnchor(GBC.WEST).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
 	      add(addButtonClient,    new GBC(6,1,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(1, 0).setInsets(1));
 	      
-	      add(lblLine,			  new GBC(0,2,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
-	      add(lblLine,			  new GBC(1,2,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
 	      add(lblLine,			  new GBC(2,2,3,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
-	      
-	      
+	      	      
 	      add(lblTask,            new GBC(0,3,1,1).setAnchor(GBC.EAST).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
 	      add(clientChoose,       new GBC(1,3,1,1).setAnchor(GBC.EAST).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
 	      
+	      add(lblProject,         new GBC(1,4,1,1).setAnchor(GBC.EAST).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
+	      add(lblTaskDetail,      new GBC(2,4,2,1).setAnchor(GBC.EAST).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
 	      
-	      add(txtTaskShortName,   new GBC(1,4,1,1).setAnchor(GBC.WEST).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
-	      add(txtTask,            new GBC(2,4,3,1).setAnchor(GBC.WEST).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
-	      add(addButtonTask,      new GBC(6,4,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(1, 0).setInsets(1));
+	      add(txtTaskShortName,   new GBC(1,5,1,1).setAnchor(GBC.WEST).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
+	      add(txtTask,            new GBC(2,5,3,1).setAnchor(GBC.WEST).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
+	      add(addButtonTask,      new GBC(6,5,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(1, 0).setInsets(1));
 	      
-	      add(closeButton, new GBC(0, 5,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(0, 0).setInsets(1));
+	      add(closeButton, new GBC(0, 6,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(0, 0).setInsets(1));
 	     
 	      
 	      pack();

@@ -108,8 +108,8 @@ public class SWING_TUTORIAL
 		  SQLProject  db =new SQLProject();
   
 		  
-		  db.SQLLiteExecStatement("INSERT INTO TASKSUMMARY (TASKDATE,CLIENTSHORTNAME,TASKSHORTNAME,TASKHOUR,TASKMINUTE, TASKSECOND,NAME) VALUES ( '3/23/2014', 'DB', 'DB OTHER', 0,30,2,'a name' );");
-		  db.SelectFromTASKSUMMARY(); 
+		 // db.SQLLiteExecStatement("INSERT INTO TASKSUMMARY (TASKDATE,CLIENTSHORTNAME,TASKSHORTNAME,TASKHOUR,TASKMINUTE, TASKSECOND,NAME) VALUES ( '3/23/2014', 'DB', 'DB OTHER', 0,30,2,'a name' );");
+		 // db.SelectFromTASKSUMMARY(); 
 		   
 	      SwingUtilities.invokeLater(new Runnable() {
 	            public void run() {
