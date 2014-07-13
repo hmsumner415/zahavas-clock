@@ -41,14 +41,14 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	public JLabel currentTaskLabel, workingLog, idleLog, workingScore, awayScore;
 	public JLabel timeLabel,activeProgramLabel;
 	public JMenuBar menuBar;
-	public JMenu editMenu;
-	public JMenuItem editTaskMenuItem;
+	public JMenu editMenu, reportMenu;
+	public JMenuItem editTaskMenuItem, reportTaskMenuItem ;
 	public EditTaskFrame TEdit;
 	
 	public boolean bStand = true, bSit = false, taskfound = false ;
 	private TaskTime T;
 	public static List<TaskTime> l = new ArrayList<TaskTime>();
-	private String CurrentTask, SelectedTask;
+	private String CurrentTask, SelectedTask, SelectedClient, SelectedProject;
 	private String taskChooseItem;
 
 	int hourCounter = 0;
@@ -85,9 +85,6 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	 *  actionPerformed
 	 *   
 	 */
-		   
-	   
-	
 	public void actionPerformed(ActionEvent e)
 	{
 	       idleSec = JNA.getIdleTimeMillisWin32() / 1000;
@@ -139,6 +136,13 @@ public class TaskFrame extends JFrame implements ActionListener  {
 				  //TEdit.dispose();
 			  }
 			  
+			  if (e.getSource() == reportTaskMenuItem)
+			  {
+				  db.SelectFromTASKSUMMARY();
+			  }
+			  
+			  
+			  
 			  if (e.getSource() == clientChoose)
 			  {
 				  projectArray = db.SelectDistinctProjectsbyClient(clientChoose.getSelectedItem().toString());
@@ -189,7 +193,11 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		         {
 				  if (taskChoose.hasFocus())
 				  {
-					  SelectedTask = taskChoose.getSelectedItem().toString();
+					  SelectedTask = clientChoose.getSelectedItem().toString() + "|" + 
+							  projectChoose.getSelectedItem().toString() + "|" +
+							  taskChoose.getSelectedItem().toString();
+					  SelectedClient = clientChoose.getSelectedItem().toString();
+					  SelectedProject = projectChoose.getSelectedItem().toString();
 				  } 
 				  else return;
 				  
@@ -198,7 +206,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		        	 timeLabel.setText (" "+ cal.getTime());
 		        	 currentTaskLabel.setText(SelectedTask);
 		            
-			
+		        	 
 	        	 System.out.println(SelectedTask);
 	        	 
 	        	 CurrentTask = workingLog.getText();
@@ -222,7 +230,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 			         		for(TaskTime TT :l){
 			         			TT.setIsActive(false);
 				         		}
-			         		l.add(T = new TaskTime(SelectedTask, sitCounter)); 
+			         		l.add(T = new TaskTime(SelectedClient, SelectedProject, SelectedTask, sitCounter)); 
 			         		taskLog.setText(printSummary());
 			         		taskfound = true;
 			         	}
@@ -327,14 +335,22 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	      activeProgramLabel = new JLabel("Unknown Program Label");
           
 	  	  menuBar = new JMenuBar();
-		  editMenu = new JMenu("Edit");
+		  
+	  	  editMenu = new JMenu("Edit");
 		  this.setJMenuBar(menuBar);
 		  menuBar.add(editMenu);
 		  editTaskMenuItem = new JMenuItem("Edit Task");
 		  editMenu.add(editTaskMenuItem);
-		  
 		  editTaskMenuItem.addActionListener(this);
-        
+        		  
+		  reportMenu = new JMenu("Reports");
+		  this.setJMenuBar(menuBar);
+		  menuBar.add(reportMenu);
+		  reportTaskMenuItem =new JMenuItem("Report Time");
+		  reportMenu.add(reportTaskMenuItem);
+		  reportTaskMenuItem.addActionListener(this);
+		  
+		  
 		  
 		  clientArray2 = db.SelectFromClient();
 		  i = clientArray2.size();
@@ -348,41 +364,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		          }  
 		       }
 		  
-		  /*projectArray = db.SelectDistinctProjectsFromTask();
-		  //System.exit(0);
-		  i = projectArray.size();
-		  String[] projects = new String[i];
-		    for(i = 0; i < projectArray.size();i++){  
-		          for(j = 0; j < ((ArrayList)projectArray.get(i)).size(); j++){  
-		             if (clients[0].equals((String)((ArrayList) projectArray.get(i)).get(0)))	{            	
-		            	 projects[i] = (String)((ArrayList) projectArray.get(i)).get(1) ;
-		            	 System.out.println(projects[i]);
-		             }
-		                         
-		          }  
-		       }
-		  */
-		  
-		  //taskArray = db.SelectFromTask();
-	      //clients.i = taskArray.size();
-	      //String[] projects = new String[i]; 
-	      //String[] tasks = new String[i]; 
-	       
-	     /* for(i = 0; i < taskArray.size();i++){  
-	          for(j = 0; j < ((ArrayList)taskArray.get(i)).size(); j++){  
-	             if (j==1) 
-	             {  	             
-	            	 if ( projects[0].equals((String)((ArrayList) taskArray.get(i)).get(0))  ){
-	            	 tasks[i] = (String)((ArrayList) taskArray.get(i)).get(2);
-	        //    	 projects[i] = (String)((ArrayList) taskArray.get(i)).get(1) ;
-	            	 }
-	             }            
-	          }  
-	       }
-	       */ 
-		  
-		  
-		  
+		 
           String idleTask[] = {"Idle"};
           if (clientArray2.size()>0)  {clientChoose = new JComboBox<String>(clients);}
           else clientChoose = new JComboBox<String>(idleTask);

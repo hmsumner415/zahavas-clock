@@ -2,8 +2,14 @@ package org.zahavas.chessclock.source;
 
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
+import javax.swing.JOptionPane;
 
 public class SQLProject extends SQLLiteAccess
 {
@@ -51,13 +57,14 @@ public class SQLProject extends SQLLiteAccess
 	      
 	      stmt = c.createStatement();
 	      sql = "CREATE TABLE TASKSUMMARY " +
-	                   "(TASKDATE       TEXT    NOT NULL," +
+	                   "(ID						INT PRIMARY KEY		NOT NULL," +
+	                   "TASKDATE       TEXT    NOT NULL," +
 	                   " CLIENTSHORTNAME 	TEXT    NOT NULL," +
 	                   " PROJECTNAME       TEXT    NOT NULL, " +
 	                   " TASKHOUR       INT     NOT NULL," +
 	                   " TASKMINUTE     INT     NOT NULL," +
 	                   " TASKSECOND     INT     NOT NULL," +
-	                   " NAME           TEXT    NOT NULL) "; 
+	                   " TASKNAME           TEXT    NOT NULL) "; 
 	      stmt.executeUpdate(sql);
 	      stmt.close();
 	      System.out.println("Table tasksummary successfully");
@@ -119,7 +126,15 @@ public class SQLProject extends SQLLiteAccess
 	    System.out.println("Operation done successfully");
 		return "SUCCESS";
 	  }	
-	 
+	
+	
+	/**
+	 * Method: InsertNewTask 
+	 * @param txtClientShortName
+	 * @param txtPROJECTNAME
+	 * @param txtTask
+	 * @return
+	 */
 	public String  InsertNewTask(String txtClientShortName, String txtPROJECTNAME, String txtTask)
 	  {
 	    Connection c = null;
@@ -172,8 +187,80 @@ public class SQLProject extends SQLLiteAccess
 	    System.out.println("Operation done successfully");
 	    return ("Success");
 	  }	
-	
-	
+	/**
+	 * Method: InsertTaskEvent
+	 * @param txtTaskDate
+	 * @param txtClientShortName
+	 * @param txtProjectNAME
+	 * @param txtTaskHour
+	 * @param txtTaskMinute
+	 * @param txtTaskSecond
+	 * @param txtTask
+	 * @return
+	 */
+	public String  InsertTaskEvent(
+			String txtTaskDate, 
+			String txtClientShortName, 
+			String txtProjectNAME,
+			int txtTaskHour,
+			int txtTaskMinute,
+			int txtTaskSecond, 
+			String txtTask)
+	{
+		 Connection c = null;
+		    Statement stmt = null;
+		    int ID = 0;
+		    int COUNT = 0;
+		    String SQLStatement;
+		    try {
+		      Class.forName("org.sqlite.JDBC");
+		      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+		      c.setAutoCommit(false);
+		      System.out.println("Opened database successfully");
+
+		      stmt = c.createStatement();
+ 		      
+		      ResultSet rs = stmt.executeQuery( "SELECT MAX(ID) as MAXID FROM TASKSUMMARY;" );
+		      while ( rs.next() ) {
+		           
+		         ID = rs.getInt("MAXID");
+	             System.out.println(ID);
+		      }
+		      rs.close();
+		      stmt.close();
+		      c.close();
+		      ID++;
+		      SQLStatement = "INSERT INTO TASKSUMMARY" +
+		      		" (" +
+		      		" ID, " +
+		      		" TASKDATE," +
+		    		" CLIENTSHORTNAME," +
+		      		" PROJECTNAME, " +
+		      	    " TASKHOUR," +
+                    " TASKMINUTE," +
+                    " TASKSECOND," +
+		      		" TASKNAME" +
+		      	    " )" +
+		      		" VALUES ( '"
+		      		+ ID + "' ,'"
+		      		+ txtTaskDate + "','"
+			        + txtClientShortName+ "','"
+			        + txtProjectNAME+ "',"
+			        + txtTaskHour+ ","
+			        + txtTaskMinute+ ","
+			        + txtTaskSecond + ",'" 
+	 		      	+ txtTask + "');";
+		      System.out.println(SQLStatement);
+		      SQLLiteExecStatement (SQLStatement); 	 
+		     
+		    } catch ( Exception e ) {
+		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+		      System.exit(0);
+		    }
+		    System.out.println("Operation done successfully");
+		    return ("Success");
+		
+	}
 	
 	public ArrayList<String> SelectFromClient()
 	 {
@@ -265,10 +352,6 @@ public class SQLProject extends SQLLiteAccess
 		
 	}
 	  
-	
-	
-	
-	
 	public ArrayList<String> SelectDistinctProjectsbyClient (String txtClientShortname)
 	{
 		 Connection c = null;
@@ -358,11 +441,40 @@ public class SQLProject extends SQLLiteAccess
 	    return returnMatrix;
 	}
 	
+	public void PrintTaskSummary()
+	{
+		
+	}
+	
+	
 	public  void SelectFromTASKSUMMARY()
 	  {
 	    Connection c = null;
 	    Statement stmt = null;
+	    GregorianCalendar d = new GregorianCalendar();
 	    try {
+	    	
+	    String date = Integer.toString(d.get(Calendar.MONTH)+1) + "/" + Integer.toString(d.get(Calendar.DAY_OF_MONTH)) + "/" +  Integer.toString(d.get(Calendar.YEAR));
+	    String FileNameDate = Integer.toString(d.get(Calendar.MONTH)+1)
+	    			+ Integer.toString(d.get(Calendar.DAY_OF_MONTH)) 
+	    			+ Integer.toString(d.get(Calendar.YEAR))
+	    			+ Integer.toString(d.get(Calendar.HOUR_OF_DAY))
+	    			+ Integer.toString(d.get(Calendar.MINUTE)) 	;
+	    	
+
+	    File file2 =new File(FileNameDate+"Summary.txt");
+	    	
+	   	 
+   		//if file doesn't exists, then create it
+   		if(!file2.exists()){
+   			file2.createNewFile();
+   		}
+   		PrintWriter outputStream = null;
+   	    outputStream = new PrintWriter(file2.getName());
+	    	
+	    	
+	    	
+	    	
 	      Class.forName("org.sqlite.JDBC");
 	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
 	      c.setAutoCommit(false);
@@ -372,32 +484,127 @@ public class SQLProject extends SQLLiteAccess
 	      ResultSet rs = stmt.executeQuery( "SELECT * FROM TASKSUMMARY;" );
 	      while ( rs.next() ) {
 	         
+	    	  /*
+	    	   "(ID						INT PRIMARY KEY		NOT NULL," +
+	                   "TASKDATE       TEXT    NOT NULL," +
+	                   " CLIENTSHORTNAME 	TEXT    NOT NULL," +
+	                   " PROJECTNAME       TEXT    NOT NULL, " +
+	                   " TASKHOUR       INT     NOT NULL," +
+	                   " TASKMINUTE     INT     NOT NULL," +
+	                   " TASKSECOND     INT     NOT NULL," +
+	                   " TASKNAME           TEXT    NOT NULL) "
+	    	  */
+	    	 int ID = rs.getInt("ID"); 
 	         String  TASKDATE = rs.getString("TASKDATE");
 	         String  CLIENTNAME = rs.getString("CLIENTSHORTNAME");
-	         String  TASKNAME = rs.getString("PROJECTNAME");
+	         String  PROJECTNAME = rs.getString("PROJECTNAME");
+	         String  TASKNAME = rs.getString("TASKNAME");
 	         int TASKHOUR  = rs.getInt("TASKHOUR");
 	         int TASKMINUTE  = rs.getInt("TASKMINUTE");
 	         int TASKSECOND  = rs.getInt("TASKSECOND");
          
+	         System.out.println( "ID = " + ID );
 	         System.out.println( "TASKDATE = " + TASKDATE );
-	          
 	         System.out.println( "CLIENTNAME = " + CLIENTNAME );
+	         System.out.println( "PROJECTNAME = " + PROJECTNAME );
 	         System.out.println( "TASKNAME = " + TASKNAME );
 	         System.out.println( "TASKHOUR = " + TASKHOUR );
 	         System.out.println( "TASKMINUTE = " + TASKMINUTE );
 	         System.out.println( "TASKSECOND = " + TASKSECOND );
 	         System.out.println();
+	         
+	         outputStream.print(ID);
+   	    	 outputStream.print("\t");
+   	    	 outputStream.write(TASKDATE);
+   	    	 outputStream.print("\t");
+     	     outputStream.write(CLIENTNAME + "\t" + PROJECTNAME +"\t"+ TASKNAME +"\t" );
+     	     outputStream.print(TASKHOUR);
+     	     outputStream.print("\t");
+     	     outputStream.print(TASKMINUTE);
+     	     outputStream.print("\t");
+     	     outputStream.println(TASKSECOND);
+	         
+	         
+	         
 	      }
 	      rs.close();
 	      stmt.close();
 	      c.close();
+	      outputStream.close();
 	    } catch ( Exception e ) {
 	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	      System.out.println("Operation done with error");
 	      System.exit(0);
-	    }
-	    System.out.println("Operation done successfully");
+	    
 	  }
-	
-	
+	/*
+	   GregorianCalendar d = new GregorianCalendar();
+	    try{
+	    	String date = Integer.toString(d.get(Calendar.MONTH)+1) + "/" + Integer.toString(d.get(Calendar.DAY_OF_MONTH)) + "/" +  Integer.toString(d.get(Calendar.YEAR));
+	    	String FileNameDate = Integer.toString(d.get(Calendar.MONTH)+1)
+	    			+ Integer.toString(d.get(Calendar.DAY_OF_MONTH)) 
+	    			+ Integer.toString(d.get(Calendar.YEAR))
+	    			+ Integer.toString(d.get(Calendar.HOUR_OF_DAY))
+	    			+ Integer.toString(d.get(Calendar.MINUTE)) 	;
+	    	
+
+	       	File file2 =new File(FileNameDate+"Summary.txt");
+	       	
+	   	 
+   		//if file doesn't exists, then create it
+   		if(!file2.exists()){
+   			file2.createNewFile();
+   		}
+   		
+   	    
+   	    PrintWriter outputStream = null;
+   	    outputStream = new PrintWriter(file2.getName());
+   	    
+   	    for(TaskTime TT :Tdemo.l){
+        		 
+   	    	 outputStream.write(TT.getClientName());
+   	    	 outputStream.print("\t");
+   	    	 outputStream.write(TT.getProjectName());
+   	    	 outputStream.print("\t");
+     	         outputStream.write(date + "\t" +TT.getTaskName() +"\t" + TT.convertToHourMinSec() + "\t");
+     	            	        
+     	        outputStream.print(TT.getHours());
+     	        outputStream.print("\t");
+     	        outputStream.print(TT.getMinutes());
+     	        outputStream.print("\t");
+     	        outputStream.println(TT.getSeconds());
+     	        
+     	        
+     	      /**
+     	  	 * Method: InsertTaskEvent
+     	  	 * @param txtTaskDate
+     	  	 * @param txtClientShortName
+     	  	 * @param txtProjectNAME
+     	  	 * @param txtTaskHour
+     	  	 * @param txtTaskMinute
+     	  	 * @param txtTaskSecond
+     	  	 * @param txtTask
+     	  	 * @return
+     	  	  
+     	      dbResult = db.InsertTaskEvent(date, TT.getClientName(), 
+     	    		  TT.getProjectName(),
+     	    		  TT.getHours(),
+     	    		  TT.getMinutes(),
+     	    		  TT.getSeconds(),
+     	    		  TT.getTaskName());
+     	        
+     	        
+ 			}
+
+   	    outputStream.close();
+     	    return true;    
+	    }catch(IOException e){
+	    	
+   		//e.printStackTrace();
+   		JOptionPane.showMessageDialog(null,e.getMessage());
+   		return false;
+   		*/
+   	}
+  	    
 	
 }

@@ -6,6 +6,10 @@ import java.text.DecimalFormat;
 public class TaskTime {
 
 	private String taskName;
+	private String clientName;
+	
+
+	private String projectName;
 	private int endTimeCounter;
 	private int taskTimecounter;
 	private boolean IsActive = false;
@@ -22,8 +26,11 @@ public class TaskTime {
 
 
 	
-	public TaskTime(String ataskName, int startTC) {
+	public TaskTime(String aclientName, String aprojectName, String ataskName, int startTC) {
+		setClientName(aclientName);
+		setProjectName(aprojectName);
 		setTaskName(ataskName);
+		
 		setStartTimeCounter(startTC);
 		DisplayTask();
 		setIsActive(true);
@@ -73,6 +80,27 @@ public class TaskTime {
 		taskName = ataskName;
 	}
 
+	public String getClientName() {
+		return clientName;
+	}
+
+
+	public void setClientName(String aclientName) {
+		this.clientName = aclientName;
+	}
+
+
+	public String getProjectName() {
+		return projectName;
+	}
+
+
+	public void setProjectName(String aprojectName) {
+		this.projectName = aprojectName;
+	}
+	
+	
+	
 	public int getTaskTimecounter() {
 		return taskTimecounter;
 	}
