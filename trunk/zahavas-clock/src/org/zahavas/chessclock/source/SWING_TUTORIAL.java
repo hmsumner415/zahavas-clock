@@ -13,8 +13,6 @@ import java.util.Date;
 import java.beans.*;
 
 import java.sql.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -35,8 +33,11 @@ public class SWING_TUTORIAL
 
 	static JNA Jdemo;
 	static TaskFrame Tdemo;
+	 
 	
-	   
+	
+	
+	
 	   /**
 	    * createAndShowGUI()
 	    * 
@@ -51,7 +52,7 @@ public class SWING_TUTORIAL
 	   public static void createAndShowGUI() {    
 	 	  
            Tdemo = new TaskFrame();
-           Tdemo.setTitle("task tracker 2");
+           Tdemo.setTitle("Task Tracker V 1.2");
            Tdemo.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
            Tdemo.setVisible(true);
            Tdemo.addWindowListener(new WindowAdapter(){
@@ -105,7 +106,7 @@ public class SWING_TUTORIAL
 	            } catch (Exception ex) {}
 	        
 		   
-		  SQLProject  db =new SQLProject();
+		  //SQLProject  db =new SQLProject();
   
 		  
 		 // db.SQLLiteExecStatement("INSERT INTO TASKSUMMARY (TASKDATE,CLIENTSHORTNAME,TASKSHORTNAME,TASKHOUR,TASKMINUTE, TASKSECOND,NAME) VALUES ( '3/23/2014', 'DB', 'DB OTHER', 0,30,2,'a name' );");
@@ -131,6 +132,8 @@ public class SWING_TUTORIAL
    
 	    public static boolean printFinalSummary()
 	    {
+	    String dbResult;
+	    SQLProject  db =new SQLProject();
 	    
 	    GregorianCalendar d = new GregorianCalendar();
 	    try{
@@ -156,13 +159,38 @@ public class SWING_TUTORIAL
     	    
     	    for(TaskTime TT :Tdemo.l){
          		 
-   	        
-      	        outputStream.write(date + "\t" +TT.getTaskName() +"\t" + TT.convertToHourMinSec() + "\t");
+    	    	 outputStream.write(TT.getClientName());
+    	    	 outputStream.print("\t");
+    	    	 outputStream.write(TT.getProjectName());
+    	    	 outputStream.print("\t");
+      	         outputStream.write(date + "\t" +TT.getTaskName() +"\t" + TT.convertToHourMinSec() + "\t");
+      	            	        
       	        outputStream.print(TT.getHours());
       	        outputStream.print("\t");
       	        outputStream.print(TT.getMinutes());
       	        outputStream.print("\t");
       	        outputStream.println(TT.getSeconds());
+      	        
+      	        
+      	      /**
+      	  	 * Method: InsertTaskEvent
+      	  	 * @param txtTaskDate
+      	  	 * @param txtClientShortName
+      	  	 * @param txtProjectNAME
+      	  	 * @param txtTaskHour
+      	  	 * @param txtTaskMinute
+      	  	 * @param txtTaskSecond
+      	  	 * @param txtTask
+      	  	 * @return
+      	  	 */
+      	      dbResult = db.InsertTaskEvent(date, TT.getClientName(), 
+      	    		  TT.getProjectName(),
+      	    		  TT.getHours(),
+      	    		  TT.getMinutes(),
+      	    		  TT.getSeconds(),
+      	    		  TT.getTaskName());
+      	        
+      	        
   			}
 
     	    outputStream.close();
