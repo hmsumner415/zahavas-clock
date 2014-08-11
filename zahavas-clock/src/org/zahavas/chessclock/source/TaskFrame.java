@@ -3,6 +3,7 @@ package org.zahavas.chessclock.source;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.*;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -42,14 +43,16 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	public JLabel timeLabel,activeProgramLabel;
 	public JMenuBar menuBar;
 	public JMenu editMenu, reportMenu;
-	public JMenuItem editTaskMenuItem, reportTaskMenuItem ;
+	public JMenuItem editTaskMenuItem, editLinkageMenuItem, reportTaskMenuItem, reportApplicationList ;
 	public EditTaskFrame TEdit;
+	public EditLinkageFrame LEdit;
 	
-	public boolean bStand = true, bSit = false, taskfound = false ;
+	public boolean bStand = true, bSit = false, taskfound = false, isMustHaveLinkageActive = false;
 	private TaskTime T;
 	public static List<TaskTime> l = new ArrayList<TaskTime>();
 	private String CurrentTask, SelectedTask, SelectedClient, SelectedProject;
 	private String taskChooseItem;
+	private String txtApplicationName = "null";
 
 	int hourCounter = 0;
 	int minuteCounter = 0;	
@@ -67,6 +70,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	private ArrayList taskArray;
 	private ArrayList projectArray;
 	private ArrayList clientArray2;
+	private ArrayList ApplicationTasks;
 	
 	private SQLProject  db =new SQLProject();
 	
@@ -88,7 +92,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	public void actionPerformed(ActionEvent e)
 	{
 	       idleSec = JNA.getIdleTimeMillisWin32() / 1000;
-           System.out.println(idleSec);
+           //System.out.println(idleSec);
            newState =
               idleSec < 30 ? State.ONLINE :
               idleSec > 3 * 60 ? State.AWAY : State.IDLE;
@@ -97,22 +101,49 @@ public class TaskFrame extends JFrame implements ActionListener  {
               state = newState;
               System.out.println(dateFormat.format(new Date()) + " # " + state);	
           }
-		  if (state ==state.AWAY){
-			  bStand = true;
-	          bSit = false;
-	          toggleButton.setText("Set to Active");
-		  }
-		  else {
-			  bSit = true;
-	          bStand = false;
-	          toggleButton.setText("Set to Idle");  
-		  }
+           if (!isMustHaveLinkageActive)
+           {	  
+        	  if (state ==state.AWAY){
+        		  bStand = true;
+        		  bSit = false;
+        		  toggleButton.setText("Set to Active");
+        	  }
+        	  else {
+        		  bSit = true;
+        		  bStand = false;
+        		  toggleButton.setText("Set to Idle");  
+        	  }
+           }
+           
+            
+           
 		  
-		  //System.out.println(state.toString());
-		  //
+		  
 		  JNA.User32.INSTANCE.GetWindowTextW(JNA.User32.INSTANCE.GetForegroundWindow(), buffer, MAX_TITLE_LENGTH);
 	        //System.out.println("Active window title: " + Native.toString(buffer));
-	        activeProgramLabel.setText("Active window title: " + Native.toString(buffer));
+	        activeProgramLabel.setText("Active Window: " + Native.toString(buffer));
+	        
+	        if (!txtApplicationName.replaceAll("`", "'").equals(Native.toString(buffer)))
+	        {	        	
+	        	System.out.println("Application name Changed from " + txtApplicationName + "To:" + Native.toString(buffer));
+	        	txtApplicationName = Native.toString(buffer);
+	        	txtApplicationName = txtApplicationName.replaceAll("'", "`");
+	        	String rslt = db.InsertApplication(txtApplicationName);
+	        	if (IsMustHaveLink (clientChoose.getSelectedItem().toString(), projectChoose.getSelectedItem().toString(), taskChoose.getSelectedItem().toString(), txtApplicationName ))
+	        	          { bSit = false;
+	      	              bStand = true;
+	    	              toggleButton.setText("Set to Idle");
+	    	              isMustHaveLinkageActive=true;
+	    	              }
+	        	else {
+	        		isMustHaveLinkageActive=false;
+	        	 	bSit = true;
+	        	 	bStand = false;
+	        	}
+	        	
+	        }
+	        
+	        
 	        PointerByReference pointer = new PointerByReference();
 	        JNA.User32.INSTANCE.GetWindowThreadProcessId(JNA.User32.INSTANCE.GetForegroundWindow(), pointer);
 	        Pointer process = JNA.Kernel32.INSTANCE.OpenProcess(JNA.Kernel32.INSTANCE.PROCESS_QUERY_INFORMATION | JNA.Kernel32.INSTANCE.PROCESS_VM_READ, false, pointer.getValue());
@@ -122,7 +153,6 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		  
 			String t ="nothing";
 			Calendar cal = new GregorianCalendar();
-			//System.out.println(cal.getTime());
 			timeLabel.setText (" "+ cal.getTime());
 			t=cal.getTime().toString() + ":" + SelectedTask; ;
         	 
@@ -136,11 +166,28 @@ public class TaskFrame extends JFrame implements ActionListener  {
 				  //TEdit.dispose();
 			  }
 			  
+			  if (e.getSource() == editLinkageMenuItem)
+			  {
+				  System.out.println("editLinkageMenuItem clicked");
+				  LEdit = new EditLinkageFrame();
+				  LEdit.setTitle("Edit Linkage");
+				  LEdit.setDefaultCloseOperation(TEdit.DO_NOTHING_ON_CLOSE);
+				  LEdit.setVisible(true);
+				  //TEdit.dispose();
+			  }
+			  
+			 
+			  
+			  
 			  if (e.getSource() == reportTaskMenuItem)
 			  {
 				  db.SelectFromTASKSUMMARY();
 			  }
 			  
+			  if (e.getSource() == reportApplicationList)
+			  {
+				  db.SelectFromApplication();
+			  }
 			  
 			  
 			  if (e.getSource() == clientChoose)
@@ -236,6 +283,21 @@ public class TaskFrame extends JFrame implements ActionListener  {
 			         	}
 			         	
 	        	 }
+	        	 //* temp placement for testing
+	        	 if (IsMustHaveLink (clientChoose.getSelectedItem().toString(), projectChoose.getSelectedItem().toString(), taskChoose.getSelectedItem().toString(), txtApplicationName ))
+     			{ bSit = false;
+   	              bStand = true;
+ 	              toggleButton.setText("Set to Idle");
+ 	              isMustHaveLinkageActive=true;
+ 	              }
+	        	 else {isMustHaveLinkageActive=false;
+	        	 	bSit = true;
+	        	 	bStand = false;
+	        	 }
+	        	  
+	        	 
+	        	 
+	        	 
 		         }
 			  
 			  else if(e.getSource() == toggleButton)
@@ -290,6 +352,90 @@ public class TaskFrame extends JFrame implements ActionListener  {
           } 
      
 	
+	private boolean IsMustHaveLink(String txtClient, String txtProject,
+			String txtTask, String txtApplicationName2) {
+		int i = 0;
+		boolean boolBrokenLink = false;
+		final String sIdle = "Idle";
+		String s, lApp, lClient, lProject, lTask;
+		System.out.print(txtClient + ":" + txtProject + ":" + txtTask + ":" + txtApplicationName2);
+		System.out.println(".");
+		i = ApplicationTasks.size();
+		for(i = 0; i < ApplicationTasks.size();i++){  
+	          for(j = 0; j < 4; j++){  
+	            	            	
+	               s=  ((AbstractList<String>) ApplicationTasks.get(i)).get(j) ;
+	               System.out.print(s);
+	               System.out.print(" ");
+	                         
+	          } 
+	          
+	          lApp = (String)((ArrayList) ApplicationTasks.get(i)).get(0);
+	          lClient =  (String)((ArrayList)  ApplicationTasks.get(i)).get(1);
+	          lProject =  (String)((ArrayList)  ApplicationTasks.get(i)).get(2);
+	          lTask =  (String)((ArrayList)  ApplicationTasks.get(i)).get(3);
+	          
+	           System.out.println(".");
+	           if (    lClient.equals(txtClient)  &&
+	        		   lProject.equals(txtProject)  &&
+	        		   lTask.equals(txtTask) &&
+	        		   lApp.equals(txtApplicationName2)
+         		   )   
+        		  { return false;  }
+	           
+	           if (
+	        		   lClient.equals(txtClient)  &&
+	        		   lProject.equals(txtProject)  &&
+	        		   lTask.equals(sIdle) &&
+	        		   lApp.equals(txtApplicationName2)
+	        	  ) { return false;  }
+	           
+	           if (
+	        		   lClient.equals(txtClient)  &&
+	        		   lProject.equals(sIdle)  &&
+	        		   lTask.equals(sIdle) &&
+	        		   lApp.equals(txtApplicationName2)
+	    	           
+	    	      ) { return false;  }
+	           // cases where linkage rule exists and application is different
+	           System.out.println("Test for linkage starts here");
+	           if
+	           (			   lClient.equals(txtClient)  &&
+	    	        		   lProject.equals(txtProject)  &&
+	    	        		   lTask.equals(txtTask) &&
+	    	        		   !(lApp.equals(txtApplicationName2))	   
+	        	  
+	        		   
+				)  { boolBrokenLink = true;}	   
+	           else if	   
+	        		   (
+	        				   lClient.equals(txtClient)  &&
+	    	        		   lProject.equals(txtProject)  &&
+	    	        		   lTask.equals(sIdle) &&
+	    	        		   !(lApp.equals(txtApplicationName2))
+
+	        		   )
+	        		    { boolBrokenLink = true;} 
+	           else if	   
+	        		   (
+	        				   lClient.equals(txtClient)  &&
+	    	        		   lProject.equals(sIdle)  &&
+	    	        		   lTask.equals(sIdle) &&
+	    	        		   !(lApp.equals(txtApplicationName2))
+	        		   )
+	        		   
+	            
+	           { boolBrokenLink = true;}
+	           
+	       }
+		
+		
+		// boolBroekLink defaulted to false;
+		System.out.println(boolBrokenLink);
+		return boolBrokenLink;
+	}
+
+
 	/**
 	 * printSummary
 	 * @return
@@ -316,7 +462,9 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	    			return sSummary;
 	    		}
 	    		
-  
+    /**
+     *  Constructor: Task Frame
+     */
 	public TaskFrame()
 	{
 		
@@ -340,15 +488,21 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		  this.setJMenuBar(menuBar);
 		  menuBar.add(editMenu);
 		  editTaskMenuItem = new JMenuItem("Edit Task");
+		  editLinkageMenuItem = new JMenuItem("Edit Linkage");
 		  editMenu.add(editTaskMenuItem);
+		  editMenu.add(editLinkageMenuItem);
 		  editTaskMenuItem.addActionListener(this);
+		  editLinkageMenuItem.addActionListener(this);
         		  
 		  reportMenu = new JMenu("Reports");
 		  this.setJMenuBar(menuBar);
 		  menuBar.add(reportMenu);
 		  reportTaskMenuItem =new JMenuItem("Report Time");
+		  reportApplicationList = new JMenuItem("Report Application List");
 		  reportMenu.add(reportTaskMenuItem);
+		  reportMenu.add(reportApplicationList);
 		  reportTaskMenuItem.addActionListener(this);
+		  reportApplicationList.addActionListener(this);
 		  
 		  
 		  
@@ -405,7 +559,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		      
 	  	
 		   
-	
+	      ApplicationTasks = db.SelectApplicationTask();
 		
 		
 	      

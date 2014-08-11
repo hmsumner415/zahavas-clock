@@ -61,7 +61,8 @@ public class SQLLiteAccess {
 	 public boolean SQLLiteExecStatement (String aStmt) 
 	  {
 
-		 
+		System.out.println(aStmt); 
+		
 	    Connection c = null;
 	    Statement stmt = null;
 	    try {

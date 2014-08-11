@@ -24,7 +24,10 @@ public class SQLProject extends SQLLiteAccess
 		Connection c = null;
 	    Statement stmt = null;
 	    try {
-	    	
+	    	EventLogger EV = new EventLogger();
+			
+			EV.LogEvent("Construct SQL Project", "INFO");
+			
 	    	File file =new File("tasktracker.db");
 	   	 
     		//if file exists, then exit
@@ -69,6 +72,29 @@ public class SQLProject extends SQLLiteAccess
 	      stmt.close();
 	      System.out.println("Table tasksummary successfully");
 	      
+	      
+	      
+	      stmt = c.createStatement();
+	      sql = "CREATE TABLE APPLICATION " +
+	                   "(ID					INT PRIMARY KEY		NOT NULL," +
+	                   " APPLICATIONAME        TEXT    NOT NULL) "; 
+	      stmt.executeUpdate(sql);
+	      stmt.close();
+	      System.out.println("Table Application successfully");
+	      
+	      stmt = c.createStatement();
+	      sql = "CREATE TABLE APPLICATIONTASK " +
+	                   "(ID					INT PRIMARY KEY		NOT NULL," +
+	                   " APPLICATIONAME        TEXT    NOT NULL," +
+	                   " CLIENTSHORTNAME 		TEXT NOT NULL," +
+	                   " PROJECTNAME 			TEXT NOT NULL," +
+	                   " TASKNAME           	TEXT NOT NULL," +
+	                   " LINKAGETYPE	        TEXT NOT NULL)"; 
+	      stmt.executeUpdate(sql);
+	      stmt.close();
+	      System.out.println("Table Application successfully");
+	      
+	      
 	      c.close();
 	    } catch ( Exception e ) {
 	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
@@ -78,6 +104,71 @@ public class SQLProject extends SQLLiteAccess
 		
 		
 	}
+	/**
+	 * Method: InsertApplication
+	 * @param txtApplication
+	 * @return
+	 */
+	public String InsertApplication(String txtApplication)
+	{	System.out.println("insert application");
+		Connection c = null;
+	    Statement stmt = null;
+	    int ID = 0;
+	    int COUNT = 0;
+	    String SQLStatement;
+	    try {
+	      Class.forName("org.sqlite.JDBC");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+	      c.setAutoCommit(false);
+	      System.out.println("Opened database successfully");
+
+	      stmt = c.createStatement();
+	      ResultSet rs0 = stmt.executeQuery( "SELECT COUNT(*) as COUNT FROM APPLICATION WHERE APPLICATIONAME = '" + txtApplication  + "';" );
+	      while ( rs0.next() ) {
+	           
+	         COUNT = rs0.getInt("COUNT");
+             System.out.println(COUNT);
+             if (COUNT > 0) {
+            	 rs0.close();
+       	         stmt.close();
+    	         c.close();
+            	 System.out.println("Application Already Exists");
+    	         return "Application Already Exists";
+           	 
+             }
+	      }
+	      rs0.close();
+	      System.out.println("Here1");
+	      
+	      
+	      ResultSet rs1 = stmt.executeQuery( "SELECT MAX(ID) as MAXID FROM APPLICATION;" );
+	      while ( rs1.next() ) {
+	           
+	         ID = rs1.getInt("MAXID");
+             System.out.println(ID);
+	      }
+	      rs1.close();
+	      stmt.close();
+	      c.close();
+	      ID++;
+	      SQLStatement = "INSERT INTO APPLICATION (ID, APPLICATIONAME) VALUES ( '" + ID + "' ,'" + txtApplication + "');";
+	      SQLLiteExecStatement (SQLStatement); 	 
+	      
+	    } catch ( Exception e ) {
+	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	      System.exit(0);
+	    }
+	    System.out.println("Operation done successfully");
+		
+		return "Success";
+	}
+	
+	/**
+	 * Method: InsertNewClient
+	 * @param txtClientShortName
+	 * @param txtClient
+	 * @return
+	 */
 	public String  InsertNewClient(String txtClientShortName, String txtClient)
 	  {
 	    Connection c = null;
@@ -98,6 +189,9 @@ public class SQLProject extends SQLLiteAccess
 	         COUNT = rs0.getInt("COUNT");
              System.out.println(COUNT);
              if (COUNT > 0) {
+            	 rs0.close();
+       	         stmt.close();
+    	         c.close();
             	 return "Client Already Exists";
            	 
              }
@@ -157,6 +251,9 @@ public class SQLProject extends SQLLiteAccess
 	         COUNT = rs0.getInt("COUNT");
              System.out.println(COUNT);
              if (COUNT > 0) {
+            	 rs0.close();
+       	         stmt.close();
+    	         c.close();
             	 return "Task " + txtTask + " in Project" + txtPROJECTNAME +  " Already Exists";
            	 
              }
@@ -187,6 +284,97 @@ public class SQLProject extends SQLLiteAccess
 	    System.out.println("Operation done successfully");
 	    return ("Success");
 	  }	
+	
+	
+	/**
+	 * Method InsertMustUseApplicationForTask
+	 * "Insert TABLE APPLICATIONTASK " +
+	                   "(ID					INT PRIMARY KEY		NOT NULL," +
+	                   " APPLICATIONAME        TEXT    NOT NULL," +
+	                   " CLIENTSHORTNAME 		TEXT NOT NULL," +
+	                   " PROJECTNAME 			TEXT NOT NULL," +
+	                   " TASKNAME           	TEXT NOT NULL," +
+	                   " LINKAGETYPE	        'MUST USE')"; 
+	      
+	 */
+	
+	public String InsertMustUseApplicationForTask(String txtClientShortName, String txtPROJECTNAME, String txtTask, String txtApplication)
+	{
+		System.out.println("I1");
+		Connection c = null;
+	    Statement stmt = null;
+	    int ID = 0;
+	    int COUNT = 0;
+	    String SQLStatement;
+	    try {
+	      Class.forName("org.sqlite.JDBC");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+	      c.setAutoCommit(false);
+	      System.out.println("Opened database successfully");
+
+	      stmt = c.createStatement();
+	      System.out.println("I2");
+	      
+	      System.out.println(txtClientShortName);
+	      
+	      SQLStatement =   "SELECT COUNT(*) as COUNT FROM APPLICATIONTASK" +
+		      		" WHERE " +
+		    		" CLIENTSHORTNAME = '" + txtClientShortName + "' and " +
+		      		" APPLICATIONAME = '" + txtApplication + "' and " +
+		      		" TASKNAME = '" + txtTask  + "' and" +
+		      		" PROJECTNAME = '" + txtPROJECTNAME +"';" ;
+	      System.out.println(SQLStatement);
+	      
+	      ResultSet rs0 = stmt.executeQuery(SQLStatement  );
+	      
+	      while ( rs0.next() ) {
+	           
+	         COUNT = rs0.getInt("COUNT");
+             System.out.println(COUNT);
+             if (COUNT > 0) {
+            	 rs0.close();
+       	         stmt.close();
+    	         c.close();
+            	 return "Duplicate Must use Linkage";
+           	 
+             }
+	      }
+	      rs0.close();
+	      
+	      System.out.println("I3");
+	      
+	      
+	      
+	      ResultSet rs = stmt.executeQuery( "SELECT MAX(ID) as MAXID FROM APPLICATIONTASK;" );
+	      while ( rs.next() ) {
+	           
+	         ID = rs.getInt("MAXID");
+             System.out.println(ID);
+	      }
+	      rs.close();
+	      stmt.close();
+	      c.close();
+	      ID++;
+	      SQLStatement = "INSERT INTO APPLICATIONTASK (ID, APPLICATIONAME, LINKAGETYPE,  CLIENTSHORTNAME, PROJECTNAME, TASKNAME) " +
+	      		"VALUES ( '" + ID + "' ,'" +
+	      		  txtApplication + "', 'MUSTUSE', '" +
+	    		  txtClientShortName + "' ,'" + 
+	      		  txtPROJECTNAME + "','" + 
+	    		  txtTask + "');";
+	      System.out.println(SQLStatement);
+	      SQLLiteExecStatement (SQLStatement); 	 
+	      //SelectFromClient();
+	    } catch ( Exception e ) {
+	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	      System.exit(0);
+	    }
+	    System.out.println("Operation done successfully");
+		
+		
+		return ("Success");
+	}
+	
+	
 	/**
 	 * Method: InsertTaskEvent
 	 * @param txtTaskDate
@@ -303,11 +491,128 @@ public class SQLProject extends SQLLiteAccess
 	      System.exit(0);
 	    }
 	    System.out.println("Operation done successfully");
-		
-		
-		
+				
 		return returnMatrix;
 	}
+
+	public ArrayList<String> SelectFromApplication()
+	{
+		 Connection c = null;
+		    Statement stmt = null;
+		    int i = 0;
+		    ArrayList returnMatrix = null;
+	        returnMatrix = new ArrayList();
+		   // returnMatrix.addAll(new ArrayList());
+		    try {
+		      Class.forName("org.sqlite.JDBC");
+		      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+		      c.setAutoCommit(false);
+		      System.out.println("Opened database successfully");
+		     
+		      
+		      stmt = c.createStatement();
+		      ResultSet rs = stmt.executeQuery( "SELECT * FROM APPLICATION ORDER BY APPLICATIONAME;" );
+		      System.out.println("Start loop");
+		      while ( rs.next() ) {
+		         
+		         int   ID = rs.getInt("ID");
+		         String APPLICATIONAME  = rs.getString("APPLICATIONAME");
+		         
+		         System.out.println( "ID = " + ID );
+		         System.out.println( "APPLICATIONNAME = " + APPLICATIONAME );
+		         System.out.println();
+		         returnMatrix.add(new ArrayList());
+		         ((ArrayList)returnMatrix.get(i)).add(APPLICATIONAME);
+		         i++;
+		         System.out.println("loop");
+		         
+		      }
+		      rs.close();
+		      stmt.close();
+		      c.close();
+		    } catch ( Exception e ) {
+		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+		      System.exit(0);
+		    }
+		    System.out.println("Operation done successfully");
+		    
+		    return returnMatrix;
+		
+	}
+	
+	/**
+	 * "CREATE TABLE APPLICATIONTASK " +
+	                   "(ID					INT PRIMARY KEY		NOT NULL," +
+	                   " APPLICATIONAME        TEXT    NOT NULL," +
+	                   " CLIENTSHORTNAME 		TEXT NOT NULL," +
+	                   " PROJECTNAME 			TEXT NOT NULL," +
+	                   " TASKNAME           	TEXT NOT NULL," +
+	                   " LINKAGETYPE	        TEXT NOT NULL)"
+	 */
+	public ArrayList<String> SelectApplicationTask()
+	{
+		 Connection c = null;
+		    Statement stmt = null;
+		    int i = 0;
+		    ArrayList returnMatrix = null;
+	        returnMatrix = new ArrayList();
+		   // returnMatrix.addAll(new ArrayList());
+		    try {
+		      Class.forName("org.sqlite.JDBC");
+		      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+		      c.setAutoCommit(false);
+		      System.out.println("Opened database successfully");
+		     
+		      
+		      stmt = c.createStatement();
+		      ResultSet rs = stmt.executeQuery( "SELECT * FROM APPLICATIONTASK WHERE LINKAGETYPE = 'MUSTUSE' ORDER BY APPLICATIONAME;" );
+		      System.out.println("Start loop");
+		      while ( rs.next() ) {
+		         
+		         int   ID = rs.getInt("ID");
+		         String APPLICATIONAME  = rs.getString("APPLICATIONAME");
+		         String CLIENTSHORTNAME  = rs.getString("CLIENTSHORTNAME");
+		         String PROJECTNAME  = rs.getString("PROJECTNAME");
+		         String TASKNAME  = rs.getString("TASKNAME");
+		         String LINKAGETYPE  = rs.getString("LINKAGETYPE");
+		         
+		         
+		         System.out.print( "ID = " + ID );
+		         System.out.print( ":APPLICATIONNAME = " + APPLICATIONAME );
+		         System.out.print(" " + CLIENTSHORTNAME + " " + PROJECTNAME + " " + TASKNAME);
+		         System.out.println( " " + LINKAGETYPE );
+		         System.out.println();
+		         returnMatrix.add(new ArrayList());
+		         ((ArrayList)returnMatrix.get(i)).add(APPLICATIONAME);
+		         ((ArrayList)returnMatrix.get(i)).add(CLIENTSHORTNAME);
+		         ((ArrayList)returnMatrix.get(i)).add(PROJECTNAME);
+		         ((ArrayList)returnMatrix.get(i)).add(TASKNAME);
+		         ((ArrayList)returnMatrix.get(i)).add(LINKAGETYPE);
+		         i++;
+		         System.out.println("loop");
+		         
+		      }
+		      rs.close();
+		      stmt.close();
+		      c.close();
+		    } catch ( Exception e ) {
+		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+		      System.exit(0);
+		    }
+		    System.out.println("Operation done successfully");
+		    
+		    return returnMatrix;
+		
+	}
+	
+	
+	
+	/**
+	 * 
+	 * @param txtClientShortname
+	 * @param txtProjectName
+	 * @return
+	 */
 	
 	public ArrayList<String> SelectDistinctTasksbyClientProject(String txtClientShortname, String txtProjectName)
 	{
@@ -325,7 +630,7 @@ public class SQLProject extends SQLLiteAccess
 
 	      stmt = c.createStatement();
 	      
-	      sqlstmt =  "SELECT TASKNAME FROM TASK WHERE CLIENTSHORTNAME = '"+ txtClientShortname + "' AND PROJECTNAME = '"+ txtProjectName + "';";
+	      sqlstmt =  "SELECT TASKNAME FROM TASK WHERE CLIENTSHORTNAME = '"+ txtClientShortname + "' AND PROJECTNAME = '"+ txtProjectName + "' ORDER BY TASKNAME;";
 	      System.out.println(sqlstmt);
 	      
 	      ResultSet rs = stmt.executeQuery(sqlstmt);
@@ -395,7 +700,105 @@ public class SQLProject extends SQLLiteAccess
 	}
 	
 	
-	
+	public boolean IsMustHaveLink (String txtClientShortName, String txtProjectName, String txtTaskName, String txtApplicationName )
+	{
+		System.out.println("I1");
+		Connection c = null;
+	    Statement stmt = null;
+	    ResultSet rs0; 
+	    int ID = 0;
+	    int COUNT = 0;
+	    String SQLStatement;
+	    try {
+	      Class.forName("org.sqlite.JDBC");
+	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+	      c.setAutoCommit(false);
+	      System.out.println("Opened database successfully");
+
+	      stmt = c.createStatement();
+	      System.out.println("I2");
+	      
+	      System.out.println(txtClientShortName);
+	      // Test exact match
+	      SQLStatement =   "SELECT COUNT(*) as COUNT FROM APPLICATIONTASK" +
+		      		" WHERE LINKAGETYPE = 'MUSTHAVE' and" +
+	    		    " APPLICATIONAME = '" + txtApplicationName + "' and " +
+		      		" CLIENTSHORTNAME = '" + txtClientShortName + "' and " +
+		      		" TASKNAME = '" + txtTaskName  + "' and" +
+		      		" PROJECTNAME = '" + txtProjectName +"';" ;
+	      System.out.println(SQLStatement);
+	      
+	      rs0 = stmt.executeQuery(SQLStatement  );
+	      
+	      while ( rs0.next() ) {
+	           
+	         COUNT = rs0.getInt("COUNT");
+             System.out.println(COUNT);
+             if (COUNT > 0) {
+            	 rs0.close();
+       	         stmt.close();
+    	         c.close();
+            	 return true;
+           	 
+             }
+	      }
+	      // Test for Idle Task
+	      SQLStatement =   "SELECT COUNT(*) as COUNT FROM APPLICATIONTASK" +
+	    		  " WHERE LINKAGETYPE = 'MUSTHAVE' and" +
+	    		  " APPLICATIONAME = '" + txtApplicationName + "' and " +
+		    		" CLIENTSHORTNAME = '" + txtClientShortName + "' and " +
+		      		" TASKNAME in ( 'Idle', 'Any') and" +
+		      		" PROJECTNAME = '" + txtProjectName +"';" ;
+	      System.out.println(SQLStatement);
+	      
+	      rs0 = stmt.executeQuery(SQLStatement  );
+	      
+	      while ( rs0.next() ) {
+	           
+	         COUNT = rs0.getInt("COUNT");
+           System.out.println(COUNT);
+           if (COUNT > 0) {
+          	 rs0.close();
+     	     stmt.close();
+  	         c.close();
+          	 return true;
+         	 
+           }
+	      }
+	      
+	      SQLStatement =   "SELECT COUNT(*) as COUNT FROM APPLICATIONTASK" +
+	    		  " WHERE LINKAGETYPE = 'MUSTHAVE' and" +
+	    		  " APPLICATIONAME = '" + txtApplicationName + "' and " +
+		    		" CLIENTSHORTNAME = '" + txtClientShortName + "' and " +
+		      		" TASKNAME in ( 'Idle', 'Any') and" +
+		      		" PROJECTNAME in ( 'Idle', 'Any');" ;
+	      System.out.println(SQLStatement);
+	      
+	      rs0 = stmt.executeQuery(SQLStatement  );
+	      
+	      while ( rs0.next() ) {
+	           
+	         COUNT = rs0.getInt("COUNT");
+         System.out.println(COUNT);
+         if (COUNT > 0) {
+        	 rs0.close();
+   	         stmt.close();
+	         c.close();
+        	 return true;
+       	 
+         }
+	      }
+	      
+	      
+	      
+	    }
+	      catch ( Exception e ) {
+		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+		      System.exit(0);
+		    }
+	     return false; 
+		
+	}
 	
 
 	public ArrayList<String> SelectFromTask()

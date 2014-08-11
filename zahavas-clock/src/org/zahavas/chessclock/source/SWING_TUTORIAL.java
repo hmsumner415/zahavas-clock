@@ -35,8 +35,9 @@ public class SWING_TUTORIAL
 	static TaskFrame Tdemo;
 	 
 	
+	static EventLogger EV;
 	
-	
+	//EV =new EventLogger();
 	
 	   /**
 	    * createAndShowGUI()
@@ -50,8 +51,9 @@ public class SWING_TUTORIAL
         * 	  
         */
 	   public static void createAndShowGUI() {    
-	 	  
+		   EV =new EventLogger();
            Tdemo = new TaskFrame();
+           
            Tdemo.setTitle("Task Tracker V 1.2");
            Tdemo.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
            Tdemo.setVisible(true);

@@ -14,7 +14,8 @@ public class TaskTime {
 	private int taskTimecounter;
 	private boolean IsActive = false;
 	private int startTimeCounter;
-	
+
+
 	public int getEndTimeCounter() {
 		return endTimeCounter;
 	}
@@ -27,6 +28,11 @@ public class TaskTime {
 
 	
 	public TaskTime(String aclientName, String aprojectName, String ataskName, int startTC) {
+		
+		EventLogger EV = new EventLogger();
+		
+		EV.LogEvent("start Task Time", "INFO");
+		
 		setClientName(aclientName);
 		setProjectName(aprojectName);
 		setTaskName(ataskName);
