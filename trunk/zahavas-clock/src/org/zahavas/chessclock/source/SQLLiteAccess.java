@@ -6,6 +6,10 @@ import java.sql.Statement;
 
 public class SQLLiteAccess {
 
+	EventLogger EV = new EventLogger();
+	
+	
+	
 	/**
 	 * SQLMakeTable
 	 * @param String containing a Create Table statement 
@@ -79,7 +83,9 @@ public class SQLLiteAccess {
 	      c.commit();
 	      c.close();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	      String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+	      System.err.println( Error );
+	      EV.LogEvent(Error, "SEVERE");
 	      return false;
 	    }
 	    System.out.println("Statement executed successfully");

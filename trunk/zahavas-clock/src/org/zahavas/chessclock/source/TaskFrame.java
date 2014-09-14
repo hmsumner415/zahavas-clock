@@ -2,7 +2,6 @@ package org.zahavas.chessclock.source;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.*;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,7 +20,6 @@ import com.sun.jna.ptr.PointerByReference;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 
 public class TaskFrame extends JFrame implements ActionListener  {
@@ -187,6 +185,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 			  if (e.getSource() == reportApplicationList)
 			  {
 				  db.SelectFromApplication();
+				  printSummaryToXLTS();
 			  }
 			  
 			  
@@ -438,7 +437,8 @@ public class TaskFrame extends JFrame implements ActionListener  {
 
 	/**
 	 * printSummary
-	 * @return
+	 * called every second to display the current time usage
+	 * @return String
 	 */
 	public static String printSummary()
 	    		{	
@@ -456,11 +456,29 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	    			u = T.convertToHourMinSec();
 	    			sSummary = sSummary +sDate +"\t" + s + "\t" +  u + "\n";
 	    			//System.out.println(sSummary);
-	            
 	            }
-	    		
-	    			return sSummary;
-	    		}
+	    		return sSummary;
+	   		}
+	
+	public static void printSummaryToXLTS()
+	{	
+				
+		GregorianCalendar d = new GregorianCalendar();
+		String sDate = d.getTime().toString();
+		String sSummary = "";
+		String s, u;
+		TaskTime T;
+		 
+		//System.out.println("printObj");
+		XMLUtilities XML = new XMLUtilities();
+		//String sXML = XML.objectToXML();
+		//System.out.println(sXML);
+		 
+		 
+		
+
+	}
+	
 	    		
     /**
      *  Constructor: Task Frame

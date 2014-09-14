@@ -33,9 +33,11 @@ public class SWING_TUTORIAL
 
 	static JNA Jdemo;
 	static TaskFrame Tdemo;
+	static XMLDOMSample XDS;
 	 
 	
 	static EventLogger EV;
+	static XMLUtilities XML;
 	
 	//EV =new EventLogger();
 	
@@ -52,8 +54,10 @@ public class SWING_TUTORIAL
         */
 	   public static void createAndShowGUI() {    
 		   EV =new EventLogger();
+		   XML = new XMLUtilities();
            Tdemo = new TaskFrame();
-           
+           XDS =new XMLDOMSample();
+            
            Tdemo.setTitle("Task Tracker V 1.2");
            Tdemo.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
            Tdemo.setVisible(true);
