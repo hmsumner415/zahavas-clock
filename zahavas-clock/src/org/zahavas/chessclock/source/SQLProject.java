@@ -11,6 +11,8 @@ import java.util.GregorianCalendar;
 
 import javax.swing.JOptionPane;
 
+import org.w3c.dom.Document;
+
 public class SQLProject extends SQLLiteAccess
 {
 	/**
@@ -25,7 +27,8 @@ public class SQLProject extends SQLLiteAccess
 	    Statement stmt = null;
 	    try {
 	    	EventLogger EV = new EventLogger();
-			
+	    	
+			 
 			EV.LogEvent("Construct SQL Project", "INFO");
 			
 	    	File file =new File("tasktracker.db");
@@ -97,8 +100,11 @@ public class SQLProject extends SQLLiteAccess
 	      
 	      c.close();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-	      System.exit(0);
+	    	
+	     String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+		 System.err.println( Error );
+		 EV.LogEvent(Error, "SEVERE");	
+	     System.exit(0);
 	    }
 	    
 		
@@ -155,7 +161,10 @@ public class SQLProject extends SQLLiteAccess
 	      SQLLiteExecStatement (SQLStatement); 	 
 	      
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	      
+	      String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+	      System.err.println( Error );
+	      EV.LogEvent(Error, "SEVERE");
 	      System.exit(0);
 	    }
 	    System.out.println("Operation done successfully");
@@ -214,7 +223,9 @@ public class SQLProject extends SQLLiteAccess
 	      SQLLiteExecStatement (SQLStatement); 	 
 	      SelectFromClient();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+		      System.err.println( Error );
+		      EV.LogEvent(Error, "SEVERE");
 	      System.exit(0);
 	    }
 	    System.out.println("Operation done successfully");
@@ -278,7 +289,9 @@ public class SQLProject extends SQLLiteAccess
 	      SQLLiteExecStatement (SQLStatement); 	 
 	      SelectFromClient();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+		      System.err.println( Error );
+		      EV.LogEvent(Error, "SEVERE");
 	      System.exit(0);
 	    }
 	    System.out.println("Operation done successfully");
@@ -365,7 +378,9 @@ public class SQLProject extends SQLLiteAccess
 	      SQLLiteExecStatement (SQLStatement); 	 
 	      //SelectFromClient();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+		      System.err.println( Error );
+		      EV.LogEvent(Error, "SEVERE");
 	      System.exit(0);
 	    }
 	    System.out.println("Operation done successfully");
@@ -442,7 +457,9 @@ public class SQLProject extends SQLLiteAccess
 		      SQLLiteExecStatement (SQLStatement); 	 
 		     
 		    } catch ( Exception e ) {
-		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+		    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+			      System.err.println( Error );
+			      EV.LogEvent(Error, "SEVERE");
 		      System.exit(0);
 		    }
 		    System.out.println("Operation done successfully");
@@ -464,8 +481,20 @@ public class SQLProject extends SQLLiteAccess
 	      c.setAutoCommit(false);
 	      System.out.println("Opened database successfully");
 	     
+	    
+	      
+	      
 	      
 	      stmt = c.createStatement();
+	      ResultSet rs1 = stmt.executeQuery( "SELECT * FROM CLIENT ORDER BY CLIENTSHORTNAME;" );
+	      
+	      XMLUtilities XML = new XMLUtilities();
+	      xlts_Transforms  XLTS = new xlts_Transforms();
+	      Document xmlString = XML.SQLResultSettoXMLDocument(rs1);
+	      XLTS.xltsClientListing(xmlString);
+	      EV.LogEvent(xmlString.toString(), "INFO");
+	      
+	      
 	      ResultSet rs = stmt.executeQuery( "SELECT * FROM CLIENT ORDER BY CLIENTSHORTNAME;" );
 	      while ( rs.next() ) {
 	         
@@ -487,8 +516,10 @@ public class SQLProject extends SQLLiteAccess
 	      stmt.close();
 	      c.close();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-	      System.exit(0);
+	     String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+		 System.err.println( Error );
+		 EV.LogEvent(Error, "SEVERE");
+	     System.exit(0);
 	    }
 	    System.out.println("Operation done successfully");
 				
@@ -511,8 +542,12 @@ public class SQLProject extends SQLLiteAccess
 		     
 		      
 		      stmt = c.createStatement();
-		      ResultSet rs = stmt.executeQuery( "SELECT * FROM APPLICATION ORDER BY APPLICATIONAME;" );
+		      ResultSet rs1 = stmt.executeQuery( "SELECT * FROM APPLICATION ORDER BY APPLICATIONAME;" );
+		      XMLUtilities XML = new XMLUtilities();
+		      Document xmlString = XML.SQLResultSettoXMLDocument(rs1);
+		      EV.LogEvent(xmlString.toString(), "INFO");
 		      System.out.println("Start loop");
+		      ResultSet rs = stmt.executeQuery( "SELECT * FROM APPLICATION ORDER BY APPLICATIONAME;" );
 		      while ( rs.next() ) {
 		         
 		         int   ID = rs.getInt("ID");
@@ -527,14 +562,25 @@ public class SQLProject extends SQLLiteAccess
 		         System.out.println("loop");
 		         
 		      }
+		      
+			  
 		      rs.close();
 		      stmt.close();
 		      c.close();
+		      //System.out.println(xmlString.toString());
+			  //  EV.LogEvent(xmlString.toString(), "INFO");
 		    } catch ( Exception e ) {
-		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+		    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+			      System.err.println( Error );
+			      EV.LogEvent(Error, "SEVERE");
 		      System.exit(0);
 		    }
 		    System.out.println("Operation done successfully");
+		    
+		   
+		    
+		    
+		    
 		    
 		    return returnMatrix;
 		
@@ -589,14 +635,18 @@ public class SQLProject extends SQLLiteAccess
 		         ((ArrayList)returnMatrix.get(i)).add(TASKNAME);
 		         ((ArrayList)returnMatrix.get(i)).add(LINKAGETYPE);
 		         i++;
-		         System.out.println("loop");
+		         
 		         
 		      }
 		      rs.close();
 		      stmt.close();
 		      c.close();
+		      
+		      
 		    } catch ( Exception e ) {
-		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+		    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+			      System.err.println( Error );
+			      EV.LogEvent(Error, "SEVERE");
 		      System.exit(0);
 		    }
 		    System.out.println("Operation done successfully");
@@ -649,7 +699,9 @@ public class SQLProject extends SQLLiteAccess
 	      stmt.close();
 	      c.close();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+		      System.err.println( Error );
+		      EV.LogEvent(Error, "SEVERE");
 	      System.exit(0);
 	    }
 	    System.out.println("Operation done successfully");
@@ -692,7 +744,9 @@ public class SQLProject extends SQLLiteAccess
 		      stmt.close();
 		      c.close();
 		    } catch ( Exception e ) {
-		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+		    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+			      System.err.println( Error );
+			      EV.LogEvent(Error, "SEVERE");
 		      System.exit(0);
 		    }
 		    System.out.println("Operation done successfully");
@@ -793,7 +847,9 @@ public class SQLProject extends SQLLiteAccess
 	      
 	    }
 	      catch ( Exception e ) {
-		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	    	  String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+		      System.err.println( Error );
+		      EV.LogEvent(Error, "SEVERE");
 		      System.exit(0);
 		    }
 	     return false; 
@@ -837,10 +893,13 @@ public class SQLProject extends SQLLiteAccess
 	      stmt.close();
 	      c.close();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+	    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+		      System.err.println( Error );
+		      EV.LogEvent(Error, "SEVERE");
 	      System.exit(0);
 	    }
 	    System.out.println("Operation done successfully");
+	     
 	    return returnMatrix;
 	}
 	
@@ -855,6 +914,110 @@ public class SQLProject extends SQLLiteAccess
 	    Connection c = null;
 	    Statement stmt = null;
 	    GregorianCalendar d = new GregorianCalendar();
+	    try {
+	    	
+	    	  File file2 =new File("Summary.txt");		    	   	 
+	     		//if file doesn't exists, then create it
+	     		if(!file2.exists()){
+	     			file2.createNewFile();
+	     		}
+	     		PrintWriter outputStream = null;
+	     	    outputStream = new PrintWriter(file2.getName());
+	     	    
+	     	   Class.forName("org.sqlite.JDBC");
+	 	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+	 	      c.setAutoCommit(false);
+	 	      System.out.println("Opened database successfully");
+
+	 	      stmt = c.createStatement();
+	 	     /*
+	    	   "(ID						INT PRIMARY KEY		NOT NULL," +
+	                   "TASKDATE       TEXT    NOT NULL," +
+	                   " CLIENTSHORTNAME 	TEXT    NOT NULL," +
+	                   " PROJECTNAME       TEXT    NOT NULL, " +
+	                   " TASKHOUR       INT     NOT NULL," +
+	                   " TASKMINUTE     INT     NOT NULL," +
+	                   " TASKSECOND     INT     NOT NULL," +
+	                   " TASKNAME           TEXT    NOT NULL) "
+	    	  */
+	 	      String QUERY = "SELECT CLIENTSHORTNAME," +
+	 	      		" sum(60*60*TASKHOUR + 60*TASKMINUTE +TASKSECOND) as SUM," +
+	 	      		" sum(TASKHOUR) as SH," +
+	 	      		" sum(TASKMINUTE) as SM," +
+	 	      		" sum(TASKSECOND) as SS," +
+	 	      		" TASKDATE," +
+	 	      		
+  					" sum(60*60*TASKHOUR + 60*TASKMINUTE +TASKSECOND)/(60*60) as dbAggregateHOURS, " + 
+  					" (sum(60*60*TASKHOUR + 60*TASKMINUTE +TASKSECOND) - sum(60*60*TASKHOUR + 60*TASKMINUTE +TASKSECOND)/(60*60*60))  as dbAggregateMINUTES, " +  
+  					" (sum(60*60*TASKHOUR + 60*TASKMINUTE +TASKSECOND) - sum(60*60*TASKHOUR + 60*TASKMINUTE +TASKSECOND)/(60*60*60*60)) as  dbAggregateSeconds" +
+			          	
+	 	      		
+	 	      		" from TASKSUMMARY" +
+	 	    		" group by TASKDATE, CLIENTSHORTNAME" +  
+	 	      		" ;";
+	 	     ResultSet rs = stmt.executeQuery(QUERY); 
+	 	     while ( rs.next() ) {
+		         
+	 	    	
+		    	 String CLIENTSHORTNAME = rs.getString("CLIENTSHORTNAME"); 
+		         Integer  SUM = rs.getInt("SUM");
+		         Integer  SH = rs.getInt("SH");
+		         Integer  SM = rs.getInt("SM");
+		         Integer  SS = rs.getInt("SS");
+		         
+		         Integer  dbAggregateHOURS = rs.getInt("dbAggregateHOURS");
+		         Integer  dbAggregateMINUTES = rs.getInt("dbAggregateMINUTES");
+		         Integer  dbAggregateSECONDS = rs.getInt("dbAggregateSECONDS");
+		         
+		         
+		         String  TASKDATE = rs.getString("TASKDATE");
+		         
+		         Integer AggregateHOURS = SUM/(60*60);
+		         Integer AggregateMINUTES = (SUM - AggregateHOURS*(60*60))/60;
+		         Integer AggregateSECONDS = SUM - AggregateHOURS*(60*60) - AggregateMINUTES*60;
+
+		         outputStream.print(CLIENTSHORTNAME);
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.write(SUM.toString());
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.write(SH.toString());
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.write(SM.toString());
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.write(SS.toString());
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.print("JAVA Generated: ");
+	   	    	 outputStream.write(AggregateHOURS.toString());
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.write(AggregateMINUTES.toString());
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.write(AggregateSECONDS.toString());
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.print("SQLLiteGenerated:");
+	   	    	 outputStream.write(dbAggregateHOURS.toString());
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.write(dbAggregateMINUTES.toString());
+	   	    	 outputStream.print("\t");
+	   	    	 outputStream.write(dbAggregateSECONDS.toString());
+	   	    	 outputStream.print("\t");
+	   	    	    	    	 
+	     	     outputStream.println(TASKDATE);
+	     	      	
+		      }
+		      rs.close();
+		      stmt.close();
+		      c.close();
+		      outputStream.close();  
+	    }
+	    catch ( Exception e ) {
+		     String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+			 System.err.println( Error );
+			 EV.LogEvent(Error, "SEVERE");
+		     System.exit(0);
+	    }
+	    finally {}
+	    
+	    
 	    try {
 	    	
 	    String date = Integer.toString(d.get(Calendar.MONTH)+1) + "/" + Integer.toString(d.get(Calendar.DAY_OF_MONTH)) + "/" +  Integer.toString(d.get(Calendar.YEAR));
@@ -887,16 +1050,7 @@ public class SQLProject extends SQLLiteAccess
 	      ResultSet rs = stmt.executeQuery( "SELECT * FROM TASKSUMMARY;" );
 	      while ( rs.next() ) {
 	         
-	    	  /*
-	    	   "(ID						INT PRIMARY KEY		NOT NULL," +
-	                   "TASKDATE       TEXT    NOT NULL," +
-	                   " CLIENTSHORTNAME 	TEXT    NOT NULL," +
-	                   " PROJECTNAME       TEXT    NOT NULL, " +
-	                   " TASKHOUR       INT     NOT NULL," +
-	                   " TASKMINUTE     INT     NOT NULL," +
-	                   " TASKSECOND     INT     NOT NULL," +
-	                   " TASKNAME           TEXT    NOT NULL) "
-	    	  */
+	    	
 	    	 int ID = rs.getInt("ID"); 
 	         String  TASKDATE = rs.getString("TASKDATE");
 	         String  CLIENTNAME = rs.getString("CLIENTSHORTNAME");
@@ -905,17 +1059,6 @@ public class SQLProject extends SQLLiteAccess
 	         int TASKHOUR  = rs.getInt("TASKHOUR");
 	         int TASKMINUTE  = rs.getInt("TASKMINUTE");
 	         int TASKSECOND  = rs.getInt("TASKSECOND");
-         
-	         System.out.println( "ID = " + ID );
-	         System.out.println( "TASKDATE = " + TASKDATE );
-	         System.out.println( "CLIENTNAME = " + CLIENTNAME );
-	         System.out.println( "PROJECTNAME = " + PROJECTNAME );
-	         System.out.println( "TASKNAME = " + TASKNAME );
-	         System.out.println( "TASKHOUR = " + TASKHOUR );
-	         System.out.println( "TASKMINUTE = " + TASKMINUTE );
-	         System.out.println( "TASKSECOND = " + TASKSECOND );
-	         System.out.println();
-	         
 	         outputStream.print(ID);
    	    	 outputStream.print("\t");
    	    	 outputStream.write(TASKDATE);
@@ -926,87 +1069,19 @@ public class SQLProject extends SQLLiteAccess
      	     outputStream.print(TASKMINUTE);
      	     outputStream.print("\t");
      	     outputStream.println(TASKSECOND);
-	         
-	         
-	         
 	      }
 	      rs.close();
 	      stmt.close();
 	      c.close();
 	      outputStream.close();
 	    } catch ( Exception e ) {
-	      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-	      System.out.println("Operation done with error");
-	      System.exit(0);
+	     String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+		 System.err.println( Error );
+		 EV.LogEvent(Error, "SEVERE");
+	     System.exit(0);
 	    
 	  }
-	/*
-	   GregorianCalendar d = new GregorianCalendar();
-	    try{
-	    	String date = Integer.toString(d.get(Calendar.MONTH)+1) + "/" + Integer.toString(d.get(Calendar.DAY_OF_MONTH)) + "/" +  Integer.toString(d.get(Calendar.YEAR));
-	    	String FileNameDate = Integer.toString(d.get(Calendar.MONTH)+1)
-	    			+ Integer.toString(d.get(Calendar.DAY_OF_MONTH)) 
-	    			+ Integer.toString(d.get(Calendar.YEAR))
-	    			+ Integer.toString(d.get(Calendar.HOUR_OF_DAY))
-	    			+ Integer.toString(d.get(Calendar.MINUTE)) 	;
-	    	
-
-	       	File file2 =new File(FileNameDate+"Summary.txt");
-	       	
-	   	 
-   		//if file doesn't exists, then create it
-   		if(!file2.exists()){
-   			file2.createNewFile();
-   		}
-   		
-   	    
-   	    PrintWriter outputStream = null;
-   	    outputStream = new PrintWriter(file2.getName());
-   	    
-   	    for(TaskTime TT :Tdemo.l){
-        		 
-   	    	 outputStream.write(TT.getClientName());
-   	    	 outputStream.print("\t");
-   	    	 outputStream.write(TT.getProjectName());
-   	    	 outputStream.print("\t");
-     	         outputStream.write(date + "\t" +TT.getTaskName() +"\t" + TT.convertToHourMinSec() + "\t");
-     	            	        
-     	        outputStream.print(TT.getHours());
-     	        outputStream.print("\t");
-     	        outputStream.print(TT.getMinutes());
-     	        outputStream.print("\t");
-     	        outputStream.println(TT.getSeconds());
-     	        
-     	        
-     	      /**
-     	  	 * Method: InsertTaskEvent
-     	  	 * @param txtTaskDate
-     	  	 * @param txtClientShortName
-     	  	 * @param txtProjectNAME
-     	  	 * @param txtTaskHour
-     	  	 * @param txtTaskMinute
-     	  	 * @param txtTaskSecond
-     	  	 * @param txtTask
-     	  	 * @return
-     	  	  
-     	      dbResult = db.InsertTaskEvent(date, TT.getClientName(), 
-     	    		  TT.getProjectName(),
-     	    		  TT.getHours(),
-     	    		  TT.getMinutes(),
-     	    		  TT.getSeconds(),
-     	    		  TT.getTaskName());
-     	        
-     	        
- 			}
-
-   	    outputStream.close();
-     	    return true;    
-	    }catch(IOException e){
-	    	
-   		//e.printStackTrace();
-   		JOptionPane.showMessageDialog(null,e.getMessage());
-   		return false;
-   		*/
+	
    	}
   	    
 	

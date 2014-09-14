@@ -12,6 +12,8 @@ public class EventLogger {
 	private static FileHandler fh = null;
 	private static final Logger mylogger = Logger.getLogger("org.zahavas.chessclock");
 	final int LOG_ROTATION_COUNT = 10;
+	private boolean APPENDFLAG = true;
+	private int FILESIZE = 0;
 	
 	public EventLogger ()
 	{
@@ -21,14 +23,15 @@ public class EventLogger {
 			 fh.setFormatter(new SimpleFormatter());
 			 mylogger.addHandler(fh);
 			 mylogger.setLevel(Level.CONFIG);
-			 Handler handler = new FileHandler("%h/myapp.log", 0 , LOG_ROTATION_COUNT);
+			 Handler handler = new FileHandler("%h/myapp.log", FILESIZE , LOG_ROTATION_COUNT, APPENDFLAG);
 			 mylogger.getLogger("org.zahavas.chessclock").addHandler(handler);
 			 } 
 		catch (IOException e) {
 			 e.printStackTrace();
+			 mylogger.log(Level.SEVERE, "Can't create log file handler", e);
 			 }
 			 
-		mylogger.severe("Construct Logger");
+		mylogger.info("Constructed Logger");
  
 		
 		
@@ -37,9 +40,35 @@ public class EventLogger {
 	public void LogEvent(String msg, String Severity )	
 	{
 		
+		if (Severity.equals("ALL")){
+		mylogger.log(Level.ALL, msg);
+		}
+		if (Severity.equals("CONFIG")){
+		mylogger.log(Level.CONFIG, msg);
+		}
+		if (Severity.equals("INFO")){
+			mylogger.log(Level.INFO, msg);
+		}
+		if (Severity.equals("FINE")){		 
+		mylogger.log(Level.FINE, msg);
+		}
+		if (Severity.equals("FINER")){
+		mylogger.log(Level.FINER, msg);
+		}
+		if (Severity.equals("FINEST")){
+		mylogger.log(Level.FINEST, msg);
+		}
+		if (Severity.equals("SEVERE")){
+		mylogger.log(Level.SEVERE, msg);
+		}
+		if (Severity.equals("WARNING")){
+		mylogger.log(Level.WARNING, msg);
+		}
 		
-		mylogger.log(Level.INFO, msg);
-	
+		 
+		
+		
+		
 		
 	}	
 	
