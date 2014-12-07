@@ -33,7 +33,7 @@ public class SWING_TUTORIAL
 
 	static JNA Jdemo;
 	static TaskFrame Tdemo;
-	static XMLDOMSample XDS;
+	//static XMLDOMSample XDS;
 	 
 	
 	static EventLogger EV;
@@ -56,11 +56,14 @@ public class SWING_TUTORIAL
 		   EV =new EventLogger();
 		   XML = new XMLUtilities();
            Tdemo = new TaskFrame();
-           XDS =new XMLDOMSample();
-            
-           Tdemo.setTitle("Task Tracker V 1.2");
+           //XDS =new XMLDOMSample();
+           Image img = new ImageIcon("clock.pgn").getImage();
+           
+		   Tdemo.setIconImage(img);
+           Tdemo.setTitle("Task Tracker V 1.4");
            Tdemo.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
            Tdemo.setVisible(true);
+           
            Tdemo.addWindowListener(new WindowAdapter(){
 				public void windowClosing(WindowEvent arg0) {
 					if (!printFinalSummary()){
@@ -111,12 +114,7 @@ public class SWING_TUTORIAL
 	            
 	            } catch (Exception ex) {}
 	        
-		   
-		  //SQLProject  db =new SQLProject();
-  
-		  
-		 // db.SQLLiteExecStatement("INSERT INTO TASKSUMMARY (TASKDATE,CLIENTSHORTNAME,TASKSHORTNAME,TASKHOUR,TASKMINUTE, TASKSECOND,NAME) VALUES ( '3/23/2014', 'DB', 'DB OTHER', 0,30,2,'a name' );");
-		 // db.SelectFromTASKSUMMARY(); 
+
 		   
 	      SwingUtilities.invokeLater(new Runnable() {
 	            public void run() {
@@ -163,7 +161,7 @@ public class SWING_TUTORIAL
     	    PrintWriter outputStream = null;
     	    outputStream = new PrintWriter(file2.getName());
     	    
-    	    for(TaskTime TT :Tdemo.l){
+    	    for(TaskTime TT :Tdemo.lTaskTime){
          		 
     	    	 outputStream.write(TT.getClientName());
     	    	 outputStream.print("\t");
