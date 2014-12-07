@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.swing.*;
 
+import org.w3c.dom.Document;
 import org.zahavas.chessclock.source.JNA.State;
 
 import com.sun.jna.Native;
@@ -41,13 +42,16 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	public JLabel timeLabel,activeProgramLabel;
 	public JMenuBar menuBar;
 	public JMenu editMenu, reportMenu;
-	public JMenuItem editTaskMenuItem, editLinkageMenuItem, reportTaskMenuItem, reportApplicationList ;
+	public JMenuItem editTaskMenuItem, editLinkageMenuItem; 
+	public JMenuItem reportTaskMenuItem, reportApplicationList, reportClientListMenuItem , reportTimeSummaryItem;
 	public EditTaskFrame TEdit;
+	public reportTimeSummaryFrame REdit;
 	public EditLinkageFrame LEdit;
+	public msgInActivityFrame mMsg;
 	
 	public boolean bStand = true, bSit = false, taskfound = false, isMustHaveLinkageActive = false;
 	private TaskTime T;
-	public static List<TaskTime> l = new ArrayList<TaskTime>();
+	public static List<TaskTime> lTaskTime = new ArrayList<TaskTime>();
 	private String CurrentTask, SelectedTask, SelectedClient, SelectedProject;
 	private String taskChooseItem;
 	private String txtApplicationName = "null";
@@ -72,13 +76,15 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	
 	private SQLProject  db =new SQLProject();
 	
-	//static JNA Jdemo;
 	int idleSec = 0;
 	State state = State.UNKNOWN;
+	boolean stateChanged = false;
 	State newState = State.UNKNOWN;
 	DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
 	
 	
+	 
+			
 	{
 		Timer displayTimer = new Timer(1000, this);
 		 displayTimer.start(); 
@@ -97,8 +103,12 @@ public class TaskFrame extends JFrame implements ActionListener  {
 
           if (newState != state) {
               state = newState;
-              System.out.println(dateFormat.format(new Date()) + " # " + state);	
+              stateChanged = true;
+               
+              //System.out.println(dateFormat.format(new Date()) + " # " + state);	
           }
+          else stateChanged = false;
+          
            if (!isMustHaveLinkageActive)
            {	  
         	  if (state ==state.AWAY){
@@ -113,7 +123,19 @@ public class TaskFrame extends JFrame implements ActionListener  {
         	  }
            }
            
-            
+           if (state == state.AWAY && stateChanged == true) 
+           {
+        	   Toolkit.getDefaultToolkit().beep();
+        	   mMsg = new msgInActivityFrame();
+        	   mMsg.setTitle("Notification");
+        	   mMsg.setDefaultCloseOperation(mMsg.DO_NOTHING_ON_CLOSE);
+        	   mMsg.setLocation(300,300);
+        	  
+        	   mMsg.setVisible(true);
+        	   mMsg.toFront();
+        	   mMsg.repaint();
+        	   mMsg.requestFocus();
+           }
            
 		  
 		  
@@ -123,7 +145,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	        
 	        if (!txtApplicationName.replaceAll("`", "'").equals(Native.toString(buffer)))
 	        {	        	
-	        	System.out.println("Application name Changed from " + txtApplicationName + "To:" + Native.toString(buffer));
+	        	//System.out.println("Application name Changed from " + txtApplicationName + "To:" + Native.toString(buffer));
 	        	txtApplicationName = Native.toString(buffer);
 	        	txtApplicationName = txtApplicationName.replaceAll("'", "`");
 	        	String rslt = db.InsertApplication(txtApplicationName);
@@ -156,7 +178,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
         	 
 			  if (e.getSource() == editTaskMenuItem)
 			  {
-				  System.out.println("editTaskMenuItem clicked");
+				  //System.out.println("editTaskMenuItem clicked");
 				  TEdit = new EditTaskFrame();
 				  TEdit.setTitle("Edit Tasks");
 				  TEdit.setDefaultCloseOperation(TEdit.DO_NOTHING_ON_CLOSE);
@@ -166,7 +188,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 			  
 			  if (e.getSource() == editLinkageMenuItem)
 			  {
-				  System.out.println("editLinkageMenuItem clicked");
+				  //System.out.println("editLinkageMenuItem clicked");
 				  LEdit = new EditLinkageFrame();
 				  LEdit.setTitle("Edit Linkage");
 				  LEdit.setDefaultCloseOperation(TEdit.DO_NOTHING_ON_CLOSE);
@@ -174,18 +196,35 @@ public class TaskFrame extends JFrame implements ActionListener  {
 				  //TEdit.dispose();
 			  }
 			  
-			 
+			  if (e.getSource() == reportTimeSummaryItem)
+			  {
+				  //System.out.println("editTaskMenuItem clicked");
+				  REdit = new reportTimeSummaryFrame();
+				  REdit.setTitle("Time Summary Report");
+				  REdit.setDefaultCloseOperation(REdit.DO_NOTHING_ON_CLOSE);
+				  REdit.setVisible(true);
+				  //REdit.dispose();
+			  }
+				  
+				  
+			  if (e.getSource() == reportClientListMenuItem)
+			  {
+				  db.SelectFromClientReport();
+	  
+			  }
 			  
 			  
 			  if (e.getSource() == reportTaskMenuItem)
 			  {
+				  printSummaryToXLTS(lTaskTime);
 				  db.SelectFromTASKSUMMARY();
+				  
 			  }
 			  
 			  if (e.getSource() == reportApplicationList)
 			  {
 				  db.SelectFromApplication();
-				  printSummaryToXLTS();
+				  
 			  }
 			  
 			  
@@ -247,19 +286,19 @@ public class TaskFrame extends JFrame implements ActionListener  {
 				  } 
 				  else return;
 				  
-		        	 System.out.println(SelectedTask);
+		        	 //System.out.println(SelectedTask);
 		        	 t=cal.getTime().toString() + ":" + SelectedTask; 
 		        	 timeLabel.setText (" "+ cal.getTime());
 		        	 currentTaskLabel.setText(SelectedTask);
 		            
 		        	 
-	        	 System.out.println(SelectedTask);
+	        	 //System.out.println(SelectedTask);
 	        	 
 	        	 CurrentTask = workingLog.getText();
 	        	 if (!(CurrentTask.equals(SelectedTask) ))
 	        	 { // Different task.  Set end time of CurrentTask.  Set start time of new task
 	        		 	taskfound = false;
-			         	for(TaskTime TT :l){
+			         	for(TaskTime TT :lTaskTime){
 			         						         			
 			         		if (TT.getTaskName().equals(SelectedTask)) 
 			         			{taskfound = true;
@@ -273,10 +312,10 @@ public class TaskFrame extends JFrame implements ActionListener  {
 			         		}
 			         	}	
 			         	if ( !taskfound) {
-			         		for(TaskTime TT :l){
+			         		for(TaskTime TT :lTaskTime){
 			         			TT.setIsActive(false);
 				         		}
-			         		l.add(T = new TaskTime(SelectedClient, SelectedProject, SelectedTask, sitCounter)); 
+			         		lTaskTime.add(T = new TaskTime(SelectedClient, SelectedProject, SelectedTask, sitCounter)); 
 			         		taskLog.setText(printSummary());
 			         		taskfound = true;
 			         	}
@@ -325,7 +364,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
      	  			secondCounter =  sitCounter % 60;
      	  			workingScore.setText(" " +  hourCounter + ":" + minuteCounter + ":" + secondCounter);
      	  	        
-     	  			for(TaskTime TT :l){
+     	  			for(TaskTime TT :lTaskTime){
 			         		if (TT.isIsActive())
 			         		{
 			         			TT.setTaskTimeCounterIncrement();
@@ -357,15 +396,15 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		boolean boolBrokenLink = false;
 		final String sIdle = "Idle";
 		String s, lApp, lClient, lProject, lTask;
-		System.out.print(txtClient + ":" + txtProject + ":" + txtTask + ":" + txtApplicationName2);
-		System.out.println(".");
+		//System.out.print(txtClient + ":" + txtProject + ":" + txtTask + ":" + txtApplicationName2);
+		//System.out.println(".");
 		i = ApplicationTasks.size();
 		for(i = 0; i < ApplicationTasks.size();i++){  
 	          for(j = 0; j < 4; j++){  
 	            	            	
 	               s=  ((AbstractList<String>) ApplicationTasks.get(i)).get(j) ;
-	               System.out.print(s);
-	               System.out.print(" ");
+	               //System.out.print(s);
+	               //System.out.print(" ");
 	                         
 	          } 
 	          
@@ -374,7 +413,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	          lProject =  (String)((ArrayList)  ApplicationTasks.get(i)).get(2);
 	          lTask =  (String)((ArrayList)  ApplicationTasks.get(i)).get(3);
 	          
-	           System.out.println(".");
+	           //System.out.println(".");
 	           if (    lClient.equals(txtClient)  &&
 	        		   lProject.equals(txtProject)  &&
 	        		   lTask.equals(txtTask) &&
@@ -397,7 +436,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	    	           
 	    	      ) { return false;  }
 	           // cases where linkage rule exists and application is different
-	           System.out.println("Test for linkage starts here");
+	           //System.out.println("Test for linkage starts here");
 	           if
 	           (			   lClient.equals(txtClient)  &&
 	    	        		   lProject.equals(txtProject)  &&
@@ -430,13 +469,14 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		
 		
 		// boolBroekLink defaulted to false;
-		System.out.println(boolBrokenLink);
+		//System.out.println(boolBrokenLink);
 		return boolBrokenLink;
 	}
 
 
 	/**
-	 * printSummary
+	 * printSummary()
+	 * public static
 	 * called every second to display the current time usage
 	 * @return String
 	 */
@@ -448,7 +488,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	    			String s, u;
 	    			TaskTime T;
 	    			//System.out.println("printObj");
-	    			Iterator<TaskTime> i = l.iterator();
+	    			Iterator<TaskTime> i = lTaskTime.iterator();
 	    		while (i.hasNext()) 
 	            {
 	            	T = i.next();
@@ -460,19 +500,16 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	    		return sSummary;
 	   		}
 	
-	public static void printSummaryToXLTS()
+	public static void printSummaryToXLTS(List<TaskTime> lTaskTime2)
 	{	
-				
-		GregorianCalendar d = new GregorianCalendar();
-		String sDate = d.getTime().toString();
-		String sSummary = "";
-		String s, u;
-		TaskTime T;
-		 
-		//System.out.println("printObj");
+
+		Document u;
+		xlts_Transforms xlts = new xlts_Transforms();
 		XMLUtilities XML = new XMLUtilities();
-		//String sXML = XML.objectToXML();
-		//System.out.println(sXML);
+		u = XML.toDomXML(lTaskTime2);
+		xlts.xltsTaskListing(u);
+
+
 		 
 		 
 		
@@ -515,13 +552,18 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		  reportMenu = new JMenu("Reports");
 		  this.setJMenuBar(menuBar);
 		  menuBar.add(reportMenu);
-		  reportTaskMenuItem =new JMenuItem("Report Time");
-		  reportApplicationList = new JMenuItem("Report Application List");
+		  reportTaskMenuItem =new JMenuItem("Today's Time");
+		  reportApplicationList = new JMenuItem("Application List");
+		  reportClientListMenuItem = new JMenuItem("Client List");
+		  reportTimeSummaryItem = new JMenuItem("Time Summary");
 		  reportMenu.add(reportTaskMenuItem);
 		  reportMenu.add(reportApplicationList);
+		  reportMenu.add(reportClientListMenuItem);
+		  reportMenu.add(reportTimeSummaryItem);
 		  reportTaskMenuItem.addActionListener(this);
 		  reportApplicationList.addActionListener(this);
-		  
+		  reportClientListMenuItem.addActionListener(this);
+		  reportTimeSummaryItem.addActionListener(this);
 		  
 		  
 		  clientArray2 = db.SelectFromClient();
