@@ -15,6 +15,9 @@ import org.w3c.dom.Document;
 
 public class SQLProject extends SQLLiteAccess
 {
+	
+	public String dbname = null;
+	
 	/**
 	 *  Class constructor
 	 *  
@@ -22,7 +25,8 @@ public class SQLProject extends SQLLiteAccess
 	 *  
 	 */
 	public SQLProject()
-	{
+	{   
+		dbname = "tasktracker.db";
 		Connection c = null;
 	    Statement stmt = null;
 	    try {
@@ -35,6 +39,7 @@ public class SQLProject extends SQLLiteAccess
 	   	 
     		//if file exists, then exit
 	    	if(file.exists()){
+	    		BuildDateGenerator();
     			return;
     		}	
 	    	
@@ -102,6 +107,20 @@ public class SQLProject extends SQLLiteAccess
 	      stmt.close();
 	      ////System.out.println("Table Application successfully");
 	      
+	      stmt = c.createStatement();
+	      sql = "CREATE TABLE DATELIST " +
+	   	                   "(ID INT PRIMARY KEY NOT NULL," +
+	   	                   " WEEKCOUNT INT NOT NULL," +
+	   	                   " YEAR TEXT NOT NULL," +
+	   	                   " WEEKOFYEAR TEXT NOT NULL); "; 
+	   	      
+	        
+	          stmt.executeUpdate(sql);
+	   	      stmt.close();
+	   	      EV.LogEvent("DATELIST generated", "INFO");	 
+	        	 
+	        
+	        
 	      
 	      c.close();
 	    } catch ( Exception e ) {
@@ -115,6 +134,156 @@ public class SQLProject extends SQLLiteAccess
 		
 		
 	}
+	
+	public void BuildDateGenerator()
+	{
+		
+		Connection c = null;
+	    Statement stmt = null;
+	    int COUNT = 0;
+	    int maxID = 0;
+	    	
+	    GregorianCalendar calYear;
+		
+	    calYear = new GregorianCalendar();
+		int year = calYear.get(Calendar.YEAR);
+        EV.LogEvent("Current year is:" + year, "INFO");
+		
+		
+	    try {
+	      Class.forName("org.sqlite.JDBC");
+		  c = DriverManager.getConnection("jdbc:sqlite:" + dbname);
+		   c.setAutoCommit(false);
+	      stmt = c.createStatement();
+	      ResultSet rs = stmt.executeQuery( "SELECT count(*) as 'COUNT' FROM DATELIST where YEAR =" + year );
+	      while ( rs.next() ) {
+	           COUNT = rs.getInt("COUNT");
+	      }
+	      rs.close();
+	      stmt.close();
+	      
+	      ResultSet rs1 = stmt.executeQuery( "SELECT MAX(ID) as MAXID FROM DATELIST;" );
+	      while ( rs.next() ) {
+	           
+	         maxID = rs.getInt("MAXID");
+             ////System.out.println(ID);
+	      }
+	      rs1.close();
+	      stmt.close();
+	      
+	      
+	      
+	      
+	      c.close();
+	      
+	      
+	      
+	      
+	    
+	    if (COUNT == 0)
+	    {
+	    	EV.LogEvent("New Calendar Year:" + year, "INFO");
+	    	GregorianCalendar calendar;
+			calendar = new GregorianCalendar();
+			calendar.set(Calendar.YEAR, year);
+			calendar.set(Calendar.MONTH, Calendar.JANUARY);
+			calendar.set(Calendar.DAY_OF_MONTH, 1);
+			String[] Months =  {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+			String[] Weeks = new String[53];
+			 int j = 0;
+			 Weeks[j] =	Months[calendar.get(Calendar.MONTH)] + " " +  calendar.get(Calendar.DAY_OF_MONTH) + ", " + calendar.get(Calendar.YEAR);
+			for (int i  = 0 ;i<=366; i++) 
+			{
+			 if (calendar.get(Calendar.DAY_OF_WEEK) == 1)
+			 {
+			 j++;	 
+			 Weeks[j] =	Months[calendar.get(Calendar.MONTH)] + " " +  calendar.get(Calendar.DAY_OF_MONTH) + ", " + calendar.get(Calendar.YEAR);
+			 }
+			 calendar.add(Calendar.DAY_OF_YEAR		 , 1);
+			} 
+			c = DriverManager.getConnection("jdbc:sqlite:" + dbname);
+			c.setAutoCommit(false);
+	    	for (int i = 0; i<=j; i++)
+	    	{
+	    		System.out.print(Weeks[i]);
+	    		System.out.print("\t");
+	    		System.out.println(i);
+	    		String SQLStatement;
+	    		String id = String.valueOf(i);
+	    		String weekcount = String.valueOf(i + 1) ;
+	    		
+	    		maxID++;
+	    		stmt = c.createStatement();
+	    	
+    		    SQLStatement = "INSERT INTO DATELIST (ID, WEEKCOUNT, YEAR, WEEKOFYEAR ) VALUES ( " +
+    		    		 maxID   +
+    		    		" ," + weekcount + " " +
+    		    		" ,'" + year + "'" +
+    		    		" ,'" + Weeks[i] + "');";
+    		    SQLLiteExecStatement (SQLStatement); 	 
+    		    stmt.close();
+	    	}	  
+	    		   
+	    		    c.close();
+	    		    
+	        }
+	       }
+	         catch ( Exception e ) {
+		    	  String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+			      System.err.println( Error );
+			      EV.LogEvent(Error, "SEVERE");
+			      System.exit(0);
+		    }	
+	    		
+	    		
+	    		
+	    		
+	    		
+	    	
+	    	
+	    
+		   
+		    /*	 Connection c = null;
+				 Statement stmt = null;	
+		      Class.forName("org.sqlite.JDBC");
+		      c = DriverManager.getConnection("jdbc:sqlite:" + dbname);
+		      c.setAutoCommit(false);
+		      
+		      EV.LogEvent("DATELIST generated attempted", "INFO");
+	   	      stmt = c.createStatement();
+	   
+	   	      String sql = "CREATE TABLE IF NOT EXISTS DATELIST2 " +
+	                   "(ID 		INT PRIMARY KEY NOT NULL," +
+	                   " WEEKCOUNT 	INT NOT NULL," +
+	                   " YEAR 		TEXT NOT NULL," +
+	                   " WEEKOFYEAR TEXT NOT NULL) ";  
+		      stmt.executeUpdate(sql);
+		      stmt.close();
+		      c.close();
+		    } catch ( Exception e ) {
+		    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+			      System.err.println( Error );
+			      EV.LogEvent(Error, "SEVERE");
+		      System.exit(0);
+		    }
+	   	      
+		      
+	   	      
+	   	      EV.LogEvent("DATELIST generated", "INFO");
+		    */  
+		     
+		     
+		 
+		  
+		       
+		      
+	}   
+		     
+		    
+  	     
+	
+	
+	
 	/**
 	 * Method: InsertApplication
 	 * @param txtApplication
@@ -192,7 +361,7 @@ public class SQLProject extends SQLLiteAccess
 	    String SQLStatement;
 	    try {
 	      Class.forName("org.sqlite.JDBC");
-	      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+	      c = DriverManager.getConnection("jdbc:sqlite:" + dbname);
 	      c.setAutoCommit(false);
 	      ////System.out.println("Opened database successfully");
 
@@ -491,7 +660,8 @@ public class SQLProject extends SQLLiteAccess
 		
 	}
 	
-	public void SelectTaskSummaryReport(boolean bCl, boolean bP, boolean bT, boolean bRptByMonth, boolean bRptByWeek,String dateFromMonth, String dateFromYear, String dateToMonth, String dateToYear)
+	public void SelectTaskSummaryReport(boolean bCl, boolean bP, boolean bT, boolean bRptByMonth,
+			boolean bRptByWeek,String dateFromMonth, String dateFromYear, String dateToMonth, String dateToYear, String clientChoose)
 	{
 		
 		if (bT) {bCl = true; bP=true;} 
@@ -503,35 +673,59 @@ public class SQLProject extends SQLLiteAccess
 		
 		
 		String sRptByMonth = bRptByMonth ? "MONTHOFYEAR "  : "";
-		String sRptByWeek = bRptByWeek ? "WEEKOFYEAR "  : "";
+		String sRptByWeek = bRptByWeek ? "B.WEEKOFYEAR  "  : "";
 		
-		String baseQuery = " cast( sum(TASKCOUNTER)/(3600) as int) 'hours'," +
-				" cast( (sum(TASKCOUNTER) -  3600* cast(sum(TASKCOUNTER)/(3600) as int))/60 as int)  'minutes'" +
-				"  from TASKSUMMARY ";
+		String baseQuery = "count(Distinct(TASKDATE)) 'DAYSINWEEK', cast( sum(TASKCOUNTER)/(3600) as int) 'hours'," +
+				" cast( (sum(TASKCOUNTER) -  3600 * cast(sum(TASKCOUNTER)/(3600) as int))/60 as int)  'minutes'" +
+				"  from TASKSUMMARY as A join DATELIST as B on A.WEEKOFYEAR = B.WEEKCOUNT ";
 		 
 		String whereClause = "";
+		
+		if (clientChoose.equals("All"))
+		{
+		
 		if (!dateFromMonth.isEmpty() && !dateFromYear.isEmpty()  && !dateToMonth.isEmpty() ) 
-		{whereClause = " where MONTHOFYEAR >= " +dateFromMonth + " and Year >= " + dateFromYear + " and MONTHOFYEAR <= " + dateToMonth ;} 
+		{whereClause = " where MONTHOFYEAR >= " +dateFromMonth + " and A.Year >= " + dateFromYear + " and MONTHOFYEAR <= " + dateToMonth ;} 
 		
 		if (!dateFromMonth.isEmpty() && !dateFromYear.isEmpty()  && dateToMonth.isEmpty()  ) 
-		{whereClause = " where MONTHOFYEAR >= " +dateFromMonth + " and Year >= " + dateFromYear;} 
+		{whereClause = " where MONTHOFYEAR >= " +dateFromMonth + " and A.Year >= " + dateFromYear;} 
+		}
+		else
+		{
+			if (!dateFromMonth.isEmpty() && !dateFromYear.isEmpty()  && !dateToMonth.isEmpty() && !clientChoose.equals("All")  ) 
+			{whereClause = " where MONTHOFYEAR >= " +dateFromMonth + " and A.Year >= " + dateFromYear + " and MONTHOFYEAR <= " + dateToMonth
+				+ " and CLIENTSHORTNAME = '" + clientChoose + "'" ;} 
+			
+			
+			if (!dateFromMonth.isEmpty() && !dateFromYear.isEmpty()  && dateToMonth.isEmpty() && !clientChoose.equals("All") ) 
+			{whereClause = " where MONTHOFYEAR >= " +dateFromMonth + " and A.Year >= " + dateFromYear  
+					+ " and CLIENTSHORTNAME = '" + clientChoose + "'";} 
+			
+		}	
+		
+		if (dateFromMonth.isEmpty() && dateFromYear.isEmpty() & !clientChoose.equals("All") )
+		{whereClause = "where CLIENTSHORTNAME = '" + clientChoose + "'";}
 		
 		
 		String builtQuery = "";
 		String groupbyQuery = "";
+		String orderbyQuery = "";
 		if (bCl &&  bP &&   bT) 
 			{builtQuery = "select " + sClient +   "," + sProject + "," + sTask + ","; 
 			 groupbyQuery = " group by "  + sClient +   "," + sProject + "," + sTask;
+			 orderbyQuery = " order by "  + sClient +   "," + sProject + "," + sTask + ", A.WEEKOFYEAR ;";
 			}
 		
 		if (bCl &&  bP &&  !bT) 
 			{builtQuery = "select " + sClient +   "," + sProject + ",";
 			groupbyQuery = " group by " + sClient +   "," + sProject ;
+			orderbyQuery = " order by "  + sClient +   "," + sProject + ", A.WEEKOFYEAR ;";
 			
 			}
 		if (bCl && !bP &&  !bT) 
 			{builtQuery = "select " + sClient + ",";
 			groupbyQuery = " group by " + sClient;
+			orderbyQuery = " order by "  + sClient +    ", A.WEEKOFYEAR ;";
 			}
 		
 		if (bRptByMonth) 
@@ -548,7 +742,7 @@ public class SQLProject extends SQLLiteAccess
 		
 		
 		
-		builtQuery += baseQuery + whereClause  + groupbyQuery +";";
+		builtQuery += baseQuery + whereClause  + groupbyQuery + orderbyQuery;
 		System.out.println(builtQuery);
 		
 		Connection c = null;
@@ -685,58 +879,87 @@ public class SQLProject extends SQLLiteAccess
 		    int i = 0;
 		    ArrayList returnMatrix = null;
 	        returnMatrix = new ArrayList();
-		   // returnMatrix.addAll(new ArrayList());
+		
 		    try {
 		      Class.forName("org.sqlite.JDBC");
 		      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
 		      c.setAutoCommit(false);
-		      ////System.out.println("Opened database successfully");
 		     
-		      
 		      stmt = c.createStatement();
 		      ResultSet rs1 = stmt.executeQuery( "SELECT * FROM APPLICATION ORDER BY APPLICATIONAME;" );
 		      XMLUtilities XML = new XMLUtilities();
-		      //Document xmlString = XML.SQLResultSettoXMLDocument(rs1);
-		      //EV.LogEvent(xmlString.toString(), "INFO");
-		      ////System.out.println("Start loop");
+		   
 		      ResultSet rs = stmt.executeQuery( "SELECT * FROM APPLICATION ORDER BY APPLICATIONAME;" );
 		      while ( rs.next() ) {
 		         
 		         int   ID = rs.getInt("ID");
 		         String APPLICATIONAME  = rs.getString("APPLICATIONAME");
-		         
-		         ////System.out.println( "ID = " + ID );
-		         ////System.out.println( "APPLICATIONNAME = " + APPLICATIONAME );
-		         ////System.out.println();
+		  
 		         returnMatrix.add(new ArrayList());
 		         ((ArrayList)returnMatrix.get(i)).add(APPLICATIONAME);
 		         i++;
-		         ////System.out.println("loop");
-		         
 		      }
-		      
-			  
 		      rs.close();
 		      stmt.close();
 		      c.close();
-		      //////System.out.println(xmlString.toString());
-			  //  EV.LogEvent(xmlString.toString(), "INFO");
 		    } catch ( Exception e ) {
 		    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
 			      System.err.println( Error );
 			      EV.LogEvent(Error, "SEVERE");
 		      System.exit(0);
 		    }
-		    ////System.out.println("Operation done successfully");
-		    
-		   
-		    
-		    
-		    
-		    
-		    return returnMatrix;
+     	    return returnMatrix;
+		}
+	
+	
+	public ArrayList<String> SelectFromApplicationFiltered(String apptext)
+	{
+		 Connection c = null;
+		    Statement stmt = null;
+		    int i = 0;
+		    ArrayList returnMatrix = null;
+	        returnMatrix = new ArrayList();
 		
-	}
+		    try {
+		      Class.forName("org.sqlite.JDBC");
+		      c = DriverManager.getConnection("jdbc:sqlite:tasktracker.db");
+		      c.setAutoCommit(false);
+		     
+		      String query = "SELECT * FROM APPLICATION  " +
+			      		"WHERE APPLICATIONAME LIKE '%" +
+					       apptext + 
+					       "%' ORDER BY APPLICATIONAME ;";
+		      System.out.println(query);
+		      
+		      stmt = c.createStatement();
+		      ResultSet rs = stmt.executeQuery(query);
+		      XMLUtilities XML = new XMLUtilities();
+		   
+		      //ResultSet rs = stmt.executeQuery( "SELECT * FROM APPLICATION ORDER BY APPLICATIONAME;" );
+		      while ( rs.next() ) {
+		         
+		         int   ID = rs.getInt("ID");
+		         String APPLICATIONAME  = rs.getString("APPLICATIONAME");
+		  
+		         returnMatrix.add(new ArrayList());
+		         ((ArrayList)returnMatrix.get(i)).add(APPLICATIONAME);
+		         i++;
+		      }
+		      System.out.println(i);
+		      rs.close();
+		      stmt.close();
+		      c.close();
+		    } catch ( Exception e ) {
+		    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+			      System.err.println( Error );
+			      EV.LogEvent(Error, "SEVERE");
+		      System.exit(0);
+		    }
+     	    return returnMatrix;
+		}
+	
+	
+	
 	
 	/**
 	 * "CREATE TABLE APPLICATIONTASK " +
@@ -1232,6 +1455,28 @@ public class SQLProject extends SQLLiteAccess
 	  }
 	
    	}
+	public String deleteApplicationTask(String selectedApplication) {
+	
+		    String SQLStatement;
+		    try {
+		     
+		      
+		      SQLStatement = "DELETE FROM APPLICATIONTASK WHERE APPLICATIONAME = '" + selectedApplication + "';";
+		      System.out.println(SQLStatement);
+		      SQLLiteExecStatement (SQLStatement); 	 
+		      //SelectFromClient();
+		    } catch ( Exception e ) {
+		    	 String Error  =  e.getClass().getName() + ": " + e.getMessage();	
+			      System.err.println( Error );
+			      EV.LogEvent(Error, "SEVERE");
+		      System.exit(0);
+		    }
+		    ////System.out.println("Operation done successfully");
+			
+			EV.LogEvent("Deletion of APPLICATIONTASK Succeeded", "INFO");
+			return ("Success");
+		
+	}
   	    
 	
 }

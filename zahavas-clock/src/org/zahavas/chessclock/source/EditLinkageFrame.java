@@ -1,13 +1,13 @@
 package org.zahavas.chessclock.source;
 
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -37,14 +37,16 @@ public class EditLinkageFrame extends JFrame implements ActionListener,  ListSel
 	private JComboBox<String> clientChoose;
 	private JComboBox<String> projectChoose;
 	private JList<String> Applications;
+	private JTextField applicationChoose; 
 
 
-	private JButton addMustUseButton, addCanUseButton, closeButton;
+	private JButton addMustUseButton, addCanUseButton, closeButton, searchButton;
     private JScrollPane scrollApplicationList;
    
 	
 	int i, j = 0;
 	
+	private DefaultListModel listApplications;
 
     
 	private ArrayList taskArray;
@@ -62,6 +64,28 @@ public class EditLinkageFrame extends JFrame implements ActionListener,  ListSel
 		  {
 			 
 			  this.dispose();
+		  }
+		 
+		 if (e.getSource() == searchButton)
+		  {
+			 listApplications.removeAllElements(); 
+			 
+			 String apptext = applicationChoose.getText();
+			 applicationArray = db.SelectFromApplicationFiltered(apptext);
+			 //applicationArray = db.SelectFromApplication();
+			  i = applicationArray.size();
+			  String[] applications = new String[i];
+			    for(i = 0; i < applicationArray.size();i++){  
+			          for(j = 0; j < ((ArrayList)applicationArray.get(i)).size(); j++){  
+			             if (j==0) 
+			             {	            	
+			            	 applications[i] = (String)((ArrayList) applicationArray.get(i)).get(0) ;
+			            	 listApplications.addElement(applications[i]);
+			             }            
+			          }  
+			       }
+			    
+			   
 		  }
 		
 		  if (e.getSource()== addMustUseButton)
@@ -173,7 +197,8 @@ public class EditLinkageFrame extends JFrame implements ActionListener,  ListSel
      closeButton = new JButton("Close");
      closeButton.addActionListener(this);
      
-
+     searchButton = new JButton("Search");
+     searchButton.addActionListener(this);
      
 
 	  clientArray2 = db.SelectFromClient();
@@ -190,22 +215,26 @@ public class EditLinkageFrame extends JFrame implements ActionListener,  ListSel
 	 
 	  applicationArray = db.SelectFromApplication();
 	  i = applicationArray.size();
+	  listApplications = new DefaultListModel();
 	  String[] applications = new String[i];
 	    for(i = 0; i < applicationArray.size();i++){  
 	          for(j = 0; j < ((ArrayList)applicationArray.get(i)).size(); j++){  
 	             if (j==0) 
 	             {	            	
 	            	 applications[i] = (String)((ArrayList) applicationArray.get(i)).get(0) ;
+	            	 listApplications.addElement(applications[i]) ;
 	             }            
 	          }  
 	       }
 	    
-	     Applications = new JList<String>(applications);
+	     Applications = new JList<String>(listApplications);
+	     
 	     Applications.setVisibleRowCount(5);
 	     Applications.setFixedCellHeight(20);
 	     Applications.setFixedCellWidth(640);
 	     Applications.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-	     Applications.addListSelectionListener(this);  
+	     Applications.addListSelectionListener(this);
+	     
 	  
 	 
      String idleTask[] = {"Idle"};
@@ -219,22 +248,31 @@ public class EditLinkageFrame extends JFrame implements ActionListener,  ListSel
      taskChoose = new JComboBox<String>(idleTask);
      taskChoose.addActionListener(this);
 
+     applicationChoose = new JTextField(20);
+     
+     
      scrollApplicationList = new JScrollPane(Applications, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
              JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-     scrollApplicationList.setPreferredSize(new Dimension(800, 800));
+     scrollApplicationList.setPreferredSize(new Dimension(600, 500));
+    
      
       
      add(clientChoose,   new GBC(0, 1, 1, 1).setAnchor(GBC.CENTER).setWeight(100, 100));
      add(projectChoose,  new GBC(1, 1, 1, 1).setAnchor(GBC.CENTER).setWeight(100, 100));
      add(taskChoose,     new GBC(2, 1, 1, 1).setAnchor(GBC.CENTER).setWeight(100, 100));
      
-     //add(Applications, new GBC(0, 2, 4, 4).setAnchor(GBC.CENTER).setWeight(100, 100));
-     add(scrollApplicationList, new GBC(0, 2, 4, 4).setAnchor(GBC.CENTER).setWeight(100, 100));
      
-     add(closeButton,    new GBC(0, 6,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(0, 0).setInsets(1));
+     add(applicationChoose, new GBC(0, 2, 1, 1).setAnchor(GBC.EAST).setWeight(100, 100));
+     add(searchButton, new GBC(1, 2, 1, 1).setAnchor(GBC.WEST).setWeight(100, 100));
+     
+     
+     add(scrollApplicationList, new GBC(0, 3, 4, 4).setAnchor(GBC.CENTER).setWeight(100, 100));
+     
+     
+     add(closeButton,    new GBC(0, 8,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(0, 0).setInsets(1));
     
-     add(addMustUseButton,new GBC(1, 6,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(0, 0).setInsets(1));
-     add(addCanUseButton,new GBC(2, 6,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(0, 0).setInsets(1));
+     add(addMustUseButton,new GBC(1, 8,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(0, 0).setInsets(1));
+     add(addCanUseButton,new GBC(2, 8,1,1).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(0, 0).setInsets(1));
 
      
      pack();
