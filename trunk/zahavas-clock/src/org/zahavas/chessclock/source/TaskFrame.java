@@ -42,11 +42,12 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	public JLabel timeLabel,activeProgramLabel;
 	public JMenuBar menuBar;
 	public JMenu editMenu, reportMenu;
-	public JMenuItem editTaskMenuItem, editLinkageMenuItem; 
+	public JMenuItem editTaskMenuItem, editLinkageMenuItem, maintainLinkageMenuItem; 
 	public JMenuItem reportTaskMenuItem, reportApplicationList, reportClientListMenuItem , reportTimeSummaryItem;
 	public EditTaskFrame TEdit;
 	public reportTimeSummaryFrame REdit;
 	public EditLinkageFrame LEdit;
+	public MaintainLinkageFrame MEdit;
 	public msgInActivityFrame mMsg;
 	
 	public boolean bStand = true, bSit = false, taskfound = false, isMustHaveLinkageActive = false;
@@ -191,10 +192,24 @@ public class TaskFrame extends JFrame implements ActionListener  {
 				  //System.out.println("editLinkageMenuItem clicked");
 				  LEdit = new EditLinkageFrame();
 				  LEdit.setTitle("Edit Linkage");
-				  LEdit.setDefaultCloseOperation(TEdit.DO_NOTHING_ON_CLOSE);
+				  LEdit.setDefaultCloseOperation(LEdit.DO_NOTHING_ON_CLOSE);
 				  LEdit.setVisible(true);
 				  //TEdit.dispose();
 			  }
+			  
+			  if (e.getSource() == maintainLinkageMenuItem)
+			  {
+				  //System.out.println("editLinkageMenuItem clicked");
+				  MEdit = new MaintainLinkageFrame();
+				  MEdit.setTitle("Maintain Linkage");
+				  MEdit.setDefaultCloseOperation(MEdit.DO_NOTHING_ON_CLOSE);
+				  MEdit.setVisible(true);
+				  //TEdit.dispose();
+			  }
+			  
+			  
+			  
+			  
 			  
 			  if (e.getSource() == reportTimeSummaryItem)
 			  {
@@ -526,7 +541,7 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	      GridBagLayout layout = new GridBagLayout();
 	      setLayout(layout);
 
-	      //ActionListener listener = EventHandler.create(ActionListener.class, this, "taskFrameListener"); 
+	      
 		
 	      currentTaskLabel = new JLabel("Not Working");
 	      workingLog = new JLabel("Working Log");
@@ -544,10 +559,13 @@ public class TaskFrame extends JFrame implements ActionListener  {
 		  menuBar.add(editMenu);
 		  editTaskMenuItem = new JMenuItem("Edit Task");
 		  editLinkageMenuItem = new JMenuItem("Edit Linkage");
+		  maintainLinkageMenuItem = new JMenuItem("Maintain Linkage");
 		  editMenu.add(editTaskMenuItem);
 		  editMenu.add(editLinkageMenuItem);
+		  editMenu.add(maintainLinkageMenuItem);
 		  editTaskMenuItem.addActionListener(this);
 		  editLinkageMenuItem.addActionListener(this);
+		  maintainLinkageMenuItem.addActionListener(this);
         		  
 		  reportMenu = new JMenu("Reports");
 		  this.setJMenuBar(menuBar);
@@ -600,8 +618,8 @@ public class TaskFrame extends JFrame implements ActionListener  {
 	      taskLog.setBorder(BorderFactory.createEtchedBorder());
 	      
 	      add(currentTaskLabel, new GBC(0, 0).setAnchor(GBC.WEST));
-	      add(workingLog, new GBC(1, 0).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
-	      add(workingScore, new GBC(2, 0).setAnchor(GBC.CENTER).setFill(GBC.HORIZONTAL).setWeight(100, 0).setInsets(1));
+	      add(workingLog, new GBC(1, 0).setAnchor(GBC.EAST).setFill(GBC.EAST).setWeight(100, 0).setInsets(1));
+	      add(workingScore, new GBC(2, 0).setAnchor(GBC.WEST).setFill(GBC.WEST).setWeight(100, 0).setInsets(1));
 	      add(idleLog, new GBC(3, 0).setAnchor(GBC.EAST));
 	      add(awayScore, new GBC(4, 0).setAnchor(GBC.EAST));
 	      

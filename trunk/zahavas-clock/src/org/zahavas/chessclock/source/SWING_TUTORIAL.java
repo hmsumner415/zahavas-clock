@@ -1,5 +1,6 @@
 package org.zahavas.chessclock.source;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import org.zahavas.chessclock.source.JNA.State;
@@ -41,6 +42,9 @@ public class SWING_TUTORIAL
 	
 	//EV =new EventLogger();
 	
+	 
+	
+	
 	   /**
 	    * createAndShowGUI()
 	    * 
@@ -57,11 +61,20 @@ public class SWING_TUTORIAL
 		   XML = new XMLUtilities();
            Tdemo = new TaskFrame();
            //XDS =new XMLDOMSample();
-           Image img = new ImageIcon("clock.pgn").getImage();
            
-		   Tdemo.setIconImage(img);
-           Tdemo.setTitle("Task Tracker V 1.4");
+          
+           
+           try {
+               Tdemo.setIconImage(ImageIO.read(new File("image/history.png")));
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+           
+
+           
+		   Tdemo.setTitle("Task Tracker V 1.4 (in Developement)");
            Tdemo.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+           Tdemo.setSize(580, 300);
            Tdemo.setVisible(true);
            
            Tdemo.addWindowListener(new WindowAdapter(){
@@ -126,7 +139,8 @@ public class SWING_TUTORIAL
 	    }
 
 	
-	   
+	  
+	      
 	   
 	   /**
 	     *  printFileSummary

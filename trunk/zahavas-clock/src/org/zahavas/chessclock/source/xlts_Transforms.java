@@ -28,7 +28,7 @@ String xltsClientListing = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
 "<xsl:template match=\"/\">" + 
 " <html> " + 
 "  <body> " +
-"  <h2>ClientListing</h2> " + 
+"  <h2>ClientListing:</h2> " + 
 "    <table border=\"1\"> " +
 "      <tr bgcolor=\"#9acd32\"> " +
 "        <th style=\"text-align:left\">Id</th> " +
@@ -102,7 +102,7 @@ String xltsTaskListing = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
 "<xsl:template match=\"/\">" + 
 " <html> " + 
 "  <body> " +
-"  <h2>Task Listing</h2> " + 
+"  <h2>Task Listing:</h2> " + 
 "    <table border=\"1\"> " +
 "      <tr bgcolor=\"#9acd32\"> " +
 "        <th style=\"text-align:left\">Task Name</th> " +
@@ -184,6 +184,7 @@ String xltsTaskSummyReport = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
 "		 <th style=\"text-align:left\">Task</th>" +
 "		 <th style=\"text-align:left\">Month</th>" +
 "		 <th style=\"text-align:left\">Week of Year</th>" +
+"		 <th style=\"text-align:left\">Days in Week</th>" +
 "		 <th style=\"text-align:left\">Hours</th>" +
 "		 <th style=\"text-align:left\">Minutes</th>" +
 "      </tr> " +
@@ -194,6 +195,7 @@ String xltsTaskSummyReport = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" +
 "		 <td><xsl:value-of select=\"TASKNAME\"/></td>" +
 "		 <td><xsl:value-of select=\"MONTHOFYEAR\"/></td>" +
 "		 <td><xsl:value-of select=\"WEEKOFYEAR\"/></td>" +
+"		 <td><xsl:value-of select=\"DAYSINWEEK\"/></td>" +
 "		 <td><xsl:value-of select=\"hours\"/></td>" +
 "		 <td><xsl:value-of select=\"minutes\"/></td>" +
 "      </tr>" +
